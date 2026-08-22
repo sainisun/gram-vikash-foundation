@@ -113,6 +113,34 @@ export async function getPublicProgramBySlug(slug: string) {
   return rows[0];
 }
 
+export async function getProgramsForAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(programs).orderBy(programs.name);
+}
+
+export async function saveProgram(input: { actorUserId: number; id?: number; slug: string; name: string; shortDescription: string; description: string; targetMetric?: string | null; currentMetricValue: number; isActive: boolean }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable");
+  const values = { slug: input.slug, name: input.name, shortDescription: input.shortDescription, description: input.description, targetMetric: input.targetMetric ?? null, currentMetricValue: input.currentMetricValue, isActive: input.isActive };
+  if (input.id) {
+    await db.update(programs).set(values).where(eq(programs.id, input.id));
+    await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.updated", entityType: "program", entityId: String(input.id), metadata: { slug: input.slug, isActive: input.isActive } });
+    return input.id;
+  }
+  const result = await db.insert(programs).values(values);
+  const id = Number(result[0].insertId);
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.created", entityType: "program", entityId: String(id), metadata: { slug: input.slug, isActive: input.isActive } });
+  return id;
+}
+
+export async function retireProgram(input: { actorUserId: number; id: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable");
+  await db.update(programs).set({ isActive: false }).where(eq(programs.id, input.id));
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.retired", entityType: "program", entityId: String(input.id), metadata: { isActive: false } });
+}
+
 export async function getPublicDonationLedger(limit = 50) {
   const db = await getDb();
   if (!db) return [];
@@ -199,6 +227,23 @@ export async function getFeatureGates() {
   const rows = await db.select().from(featureFlags).where(inArray(featureFlags.key, [...known]));
   const found = new Map(rows.map(row => [row.key, row.enabled]));
   return Object.fromEntries(known.map(key => [key, found.get(key) ?? false]));
+}
+
+export async function prepareFinancialExport(input: { actorUserId: number; scope: "donations" | "expenses" | "both" }) {
+  const [donationRows, expenseRows] = await Promise.all([
+    input.scope === "expenses" ? Promise.resolve([]) : getPublicDonationLedger(100),
+    input.scope === "donations" ? Promise.resolve([]) : getPublicExpenseLedger(100),
+  ]);
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable");
+  await db.insert(auditLogs).values({
+    actorUserId: input.actorUserId,
+    action: "financial_export.prepared",
+    entityType: "financial_export",
+    entityId: `${input.scope}:${Date.now()}`,
+    metadata: { scope: input.scope, donationRows: donationRows.length, expenseRows: expenseRows.length, fields: "public-safe" },
+  });
+  return { donationRows, expenseRows, preparedAt: new Date() };
 }
 
 export async function recordOfflineDonation(input: {

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getDonorWall, getFeatureGates, getMemberByUserId, getMembersForAdmin, getPublicDonationLedger, getPublicExpenseLedger, getPublicProgramBySlug, getPublicPrograms, getPublicTransparencySnapshot, recordExpense, recordOfflineDonation, saveMemberProfile } from "./db";
+import { getDonorWall, getFeatureGates, getMemberByUserId, getMembersForAdmin, getProgramsForAdmin, getPublicDonationLedger, getPublicExpenseLedger, getPublicProgramBySlug, getPublicPrograms, getPublicTransparencySnapshot, prepareFinancialExport, recordExpense, recordOfflineDonation, retireProgram, saveMemberProfile, saveProgram } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -65,8 +65,12 @@ export const appRouter = router({
   admin: router({
     dashboard: adminProcedure.query(async () => ({ summary: await getPublicTransparencySnapshot(), programs: await getPublicPrograms() })),
     members: adminProcedure.query(() => getMembersForAdmin()),
+    programs: adminProcedure.query(() => getProgramsForAdmin()),
+    saveProgram: adminProcedure.input(z.object({ id: z.number().int().positive().optional(), slug: z.string().trim().regex(/^[a-z0-9-]+$/).max(120), name: z.string().trim().min(3).max(180), shortDescription: z.string().trim().min(3).max(280), description: z.string().trim().min(10), targetMetric: z.string().trim().max(120).optional().nullable(), currentMetricValue: z.number().int().min(0), isActive: z.boolean() })).mutation(({ ctx, input }) => saveProgram({ actorUserId: ctx.user.id, ...input })),
+    retireProgram: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ ctx, input }) => retireProgram({ actorUserId: ctx.user.id, ...input })),
     donationLedger: adminProcedure.input(z.object({ limit: z.number().int().min(1).max(100).default(50) }).optional()).query(({ input }) => getPublicDonationLedger(input?.limit ?? 50)),
     expenseLedger: adminProcedure.input(z.object({ limit: z.number().int().min(1).max(100).default(50) }).optional()).query(({ input }) => getPublicExpenseLedger(input?.limit ?? 50)),
+    prepareFinancialExport: adminProcedure.input(z.object({ scope: z.enum(["donations", "expenses", "both"]).default("both") })).mutation(({ ctx, input }) => prepareFinancialExport({ actorUserId: ctx.user.id, scope: input.scope })),
     recordOfflineDonation: adminProcedure.input(z.object({
       memberId: z.number().int().positive(),
       programId: z.number().int().positive().optional().nullable(),

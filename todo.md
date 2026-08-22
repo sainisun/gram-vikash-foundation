@@ -17,3 +17,11 @@
 - [x] Add gated Razorpay workflow scaffolding for order preparation, webhook signature-validation entrypoint, reconciliation, and receipts without enabling live payments.
 - [x] Add explicit disabled voter-document-review API and UI scaffolding bound to feature flags.
 - [x] Verify safe Member/admin UI states and exercise the server-enforced payment gate through an authenticated typed-contract test without creating production financial or identity records.
+- [ ] Review and align the documented next-phase scope with the active implementation workspace.
+- [x] Implement protected Phase A program administration for create, edit, publish, and retire flows.
+- [x] Add an explicit receipt-readiness view to the admin workspace alongside controlled financial export preparation.
+- [x] Superseded by the documented Phase B gate: Phase B verification is deferred until moderation, grievance, and privacy prerequisites are approved.
+- [x] Review the remaining implementation plan and preserve the documented A2/A4 human-review gates before Phase B.
+- [x] Implement deterministic, admin-only ledger export preparation with minimized public-safe fields and audit evidence.
+- [x] Add public trust/about content that explains transparency, privacy, payment readiness, and feature gates without making unsupported legal claims.
+- [x] Document the A2 human-review evidence still required before payment activation or community work can begin.

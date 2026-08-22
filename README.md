@@ -22,6 +22,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/folder-structure.md`](docs/folder-structure.md) | Original file-level Next.js target structure, route groups, access rules, auth helpers, naming, and feature placement guide |
 | [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) | Active React, Express, tRPC, MySQL, and managed-auth implementation baseline with production gates |
 | [`docs/implementation-plan.md`](docs/implementation-plan.md) | Sequenced Phase A/B/C task plan with dependencies, definitions of done, and human checkpoints |
+| [`docs/a2-human-review-checklist.md`](docs/a2-human-review-checklist.md) | Evidence and sign-off record required before payment activation or any Phase B work |
 | [`docs/security-and-privacy.md`](docs/security-and-privacy.md) | Data classification, access control, payment security, minors’ privacy, retention, uploads, and incidents |
 | [`docs/content-moderation-playbook.md`](docs/content-moderation-playbook.md) | Day-to-day moderation, reports, removals, grievance handling, templates, and child-safety escalation |
 | [`docs/testing-qa-plan.md`](docs/testing-qa-plan.md) | Unit, integration, webhook, vote, mobile/low-bandwidth, security, and pre-launch testing |
