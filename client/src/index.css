@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hind:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: "Baloo 2", sans-serif;
+  --font-sans: Hind, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --color-ink: #172033;
+  --color-indigo-ink: #28306b;
+  --color-indigo: #414a94;
+  --color-turmeric: #edae31;
+  --color-paper: #fffdf6;
+  --color-paper-deep: #f7f0df;
+  --color-ledger-red: #c94a45;
+  --color-ledger-green: #18765d;
+}
+
+@layer base {
+  * { border-color: #e5dcc7; }
+  body { margin: 0; min-width: 320px; background: #fffdf6; color: #172033; font-family: Hind, sans-serif; }
+  button, input, select, textarea { font: inherit; }
+  ::selection { background: #f5d88d; color: #172033; }
+}
+
+.paper-grid {
+  background-color: #fffdf6;
+  background-image: linear-gradient(to bottom, rgba(65, 74, 148, 0.1) 1px, transparent 1px);
+  background-size: 100% 31px;
+}
+
+.ledger-panel {
+  position: relative;
+  background: rgba(255, 253, 246, 0.94);
+  border: 1px solid #e5dcc7;
+  box-shadow: 0 18px 42px rgba(34, 35, 77, 0.1);
+}
+
+.ledger-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2rem;
+  width: 1px;
+  background: rgba(201, 74, 69, 0.42);
+  pointer-events: none;
+}
+
+.ledger-content { position: relative; padding-left: 3.25rem; }
+
+.section-kicker { font-family: "IBM Plex Mono", monospace; font-size: 0.69rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #8e6617; }
+.display-title { font-family: "Baloo 2", sans-serif; font-weight: 800; letter-spacing: -0.035em; }
+.mono-number { font-family: "IBM Plex Mono", monospace; }
+
+.soft-focus:focus-visible { outline: 3px solid rgba(237, 174, 49, 0.55); outline-offset: 3px; }
+
+@media (max-width: 640px) {
+  .ledger-panel::before { left: 1.1rem; }
+  .ledger-content { padding-left: 2.1rem; }
+}

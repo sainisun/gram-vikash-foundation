@@ -1,0 +1,13 @@
+import { Download, LockKeyhole, RefreshCw } from "lucide-react";
+import { FeatureGateCard } from "@/components/foundation/FeatureGateCard";
+import { FinancialSummary } from "@/components/foundation/FinancialSummary";
+import { DonationLedger, ExpenseLedger } from "@/components/foundation/LedgerTable";
+import { TopNav } from "@/components/foundation/TopNav";
+import { trpc } from "@/lib/trpc";
+
+export default function Transparency() {
+  const donations = trpc.publicTransparency.donationLedger.useQuery({ limit: 50 });
+  const expenses = trpc.publicTransparency.expenseLedger.useQuery({ limit: 50 });
+  const donorWall = trpc.publicTransparency.donorWall.useQuery({ limit: 12 });
+  return <div className="min-h-screen bg-[#fffdf6]"><TopNav /><main className="mx-auto max-w-6xl px-4 py-12 sm:px-6"><div className="max-w-3xl"><p className="section-kicker">Public financial record</p><h1 className="display-title mt-2 text-5xl text-[#28306b]">Transparency you can inspect.</h1><p className="mt-4 text-lg leading-8 text-[#635f58]">These views project approved financial fields only. Contact details, private notes, payment credentials, and internal identities are never shown here.</p></div><div className="mt-10"><FinancialSummary /></div><div className="mt-10 grid gap-5 lg:grid-cols-2"><DonationLedger rows={donations.data ?? []} /><ExpenseLedger rows={expenses.data ?? []} /></div><section className="mt-10"><p className="section-kicker">Opt-in donor wall</p><h2 className="display-title mt-1 text-3xl">People who chose to be visible.</h2>{donorWall.data?.length ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{donorWall.data.map(row => <article key={row.id} className="rounded-xl border border-[#e5dcc7] bg-[#fffdf6] p-4"><p className="font-bold text-[#172033]">{row.displayName}</p><p className="mono-number mt-2 text-sm text-[#18765d]">₹{(row.amountPaise / 100).toLocaleString("en-IN")}</p></article>)}</div> : <div className="mt-5 rounded-xl border border-dashed border-[#d7cbb2] bg-[#fffaf0] p-6 text-sm text-[#746f66]">No public donor-wall entries are available yet. Members must actively choose public display before appearing here.</div>}</section><section className="mt-10 grid gap-4 md:grid-cols-2"><FeatureGateCard title="Downloadable exports" description="Ledger export access is reserved for authorized administrators and remains controlled while the financial operations workflow is being prepared." status="Protected operation" /><FeatureGateCard title="Live payment receipts" description="Receipt delivery will remain unavailable until merchant credentials, webhook validation, and financial approvals are recorded." status="Payment gate closed" /></section></main></div>;
+}
