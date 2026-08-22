@@ -19,6 +19,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/system-design.md`](docs/system-design.md) | Database posture, caching, polling versus realtime, vote integrity, moderation pipeline, reconciliation, and disaster recovery |
 | [`docs/database-schema.md`](docs/database-schema.md) | PostgreSQL DDL, constraints, indexes, foreign-key behavior, and data-sensitivity annotations |
 | [`docs/api-contracts.md`](docs/api-contracts.md) | JSON API methods, paths, authorization, request/response shapes, errors, and rate limits |
+| [`docs/folder-structure.md`](docs/folder-structure.md) | Complete file-level Next.js tree, route groups, access rules, auth helpers, naming, and feature placement guide |
 | [`docs/implementation-plan.md`](docs/implementation-plan.md) | Sequenced Phase A/B/C task plan with dependencies, definitions of done, and human checkpoints |
 | [`docs/security-and-privacy.md`](docs/security-and-privacy.md) | Data classification, access control, payment security, minors’ privacy, retention, uploads, and incidents |
 | [`docs/content-moderation-playbook.md`](docs/content-moderation-playbook.md) | Day-to-day moderation, reports, removals, grievance handling, templates, and child-safety escalation |
