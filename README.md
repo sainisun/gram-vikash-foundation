@@ -1,6 +1,6 @@
 # Gram Vikash Foundation
 
-Gram Vikash Foundation is a village-run charitable organization supporting free coaching for disadvantaged children, a community library, and kanyadan assistance for poor families’ daughters. This repository contains the product requirements and engineering documentation for a mobile-first donation and impact platform whose defining feature is transparent, traceable financial reporting. The public dashboard and ledgers must derive their numbers from source donation and expense records rather than hardcoded or manually maintained totals. [1]
+Gram Vikash Foundation is a village-run charitable organization supporting free coaching for disadvantaged children, a community library, and kanyadan assistance for poor families’ daughters. This repository contains the product requirements and engineering documentation for a mobile-first donation and impact platform whose defining feature is transparent, traceable financial reporting. Every donation requires a registered unified Member account; public anonymity controls only whether that Member’s name appears on the donor wall. The public dashboard and ledgers must derive their numbers from source donation and expense records rather than hardcoded or manually maintained totals. [1]
 
 > **Current status:** Requirements and implementation documentation are ready. Application code, infrastructure provisioning, and live payment enablement remain future implementation work and require the human review gates described below.
 
@@ -27,7 +27,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 
 ## Recommended implementation order
 
-Build the Donation & Transparency Platform first: database and audit foundation, admin authentication, offline donation/expense entry, public ledgers and summary, Razorpay and receipts, then mobile/low-bandwidth QA and soft launch. Keep community posting/chat disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Add voting only after the community pilot proves that identity verification and moderation operate reliably. [1]
+Build the Donation & Transparency Platform first: unified Member registration/authentication, database and audit foundation, offline donation/expense entry, public ledgers and summary, Razorpay and receipts, then mobile/low-bandwidth QA and soft launch. Keep community posting/chat disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Add voting only after the community pilot proves that document-based voter verification and moderation operate reliably. [1]
 
 ## Local development setup
 
@@ -41,7 +41,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Use synthetic data locally. Never copy production donor, kanyadan, community-member, report, receipt, or payment data into a developer environment. The first implementation should add commands for migrations, seed fixtures, linting, formatting, type checking, unit tests, integration tests, and end-to-end tests. Keep payment credentials in the provider/secret manager and use Razorpay test mode during development.
+Use synthetic data locally. Never copy production donor, kanyadan, community-member, report, receipt, or payment data into a developer environment. The first implementation should add commands for migrations, seed fixtures, linting, formatting, type checking, unit tests, integration tests, and end-to-end tests. It should also add Member registration/login, public-display consent, restricted voter-document upload/review, and the corresponding test fixtures before any payment or voting launch. Keep payment credentials in the provider/secret manager and use Razorpay test mode during development.
 
 ## Human review gates
 

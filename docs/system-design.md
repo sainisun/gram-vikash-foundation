@@ -57,18 +57,18 @@ A future SSE implementation should push an invalidation signal, not an untrusted
 
 ## 5. Vote integrity design
 
-Voting is enabled only after the community-member verification process and moderation operation are approved. A member may browse and post while unverified, but the cast-vote service requires `verification_status = 'verified'`, an age/eligibility decision recorded by an admin, an active account, and an active issue window.
+Voting is enabled only after the unified Member verification process and moderation operation are approved. A Tier 1 Registered Member may donate, browse, post, comment, and chat while not voter-verified, but the cast-vote service requires `verification_tier = 'voter_verified'`, an approved restricted government photo ID document review, an age/eligibility decision recorded by an admin, an active account, and an active issue window.
 
 The `votes` table must enforce `UNIQUE (issue_id, member_id)`. The API may first check for an existing vote to provide a friendly response, but the insert itself is the integrity guarantee. Two concurrent requests can pass a pre-check; only the database constraint reliably prevents both from being accepted. The service catches the unique-violation error, rolls back the transaction, and returns `409 Conflict`.
 
 Additional controls are layered rather than substituted for the constraint:
 
-1. Use authenticated community-member sessions with a verified account ID; never accept `member_id` from a browser request as authority.
+1. Use an authenticated unified-Member session with a server-derived Member ID; never accept `member_id`, DOB, verification tier, or ID-document status from a browser request as authority.
 2. Validate that the issue is active and the option belongs to the issue inside the transaction.
 3. Apply per-account and per-IP rate limits, with CAPTCHA or stepped-up verification if automated abuse is detected.
 4. Store issue start/end timestamps in UTC and evaluate them server-side.
 5. Keep individual vote selections private by default; expose only aggregate counts.
-6. Record issue lifecycle changes, option changes before activation, verification actions, suspicious-rate alerts, and moderation actions in the audit log.
+6. Record issue lifecycle changes, option changes before activation, document-verification actions, suspicious-rate alerts, and moderation actions in the audit log. Raw ID documents remain encrypted/restricted and are not copied into audit diffs.
 7. Never permit an admin UI or import script to bypass the unique constraint. Any correction must use a reviewed migration or documented administrative procedure.
 
 ## 6. Moderation and media pipeline

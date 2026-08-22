@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Gram Vikash Foundation is a village-run charitable platform for free coaching, a community library, and kanyadan financial support. Its first module is a mobile-first donation and transparency site where every successful donation and recorded expense is traceable through a public ledger. A later module may add community posting, public group chat, moderation, and verified-member voting. The project is designed for local beneficiaries, local and diaspora donors, a small trusted admin team, and public trust verification. Read [`PRD.md`](PRD.md) as the product source of truth. [1]
+Gram Vikash Foundation is a village-run charitable platform for free coaching, a community library, and kanyadan financial support. Its first module is a mobile-first donation and transparency site where every successful donation and recorded expense is traceable through a public ledger. One registered Member account is required for donation and is also the identity used for later community posting, comments, chat, and voter verification. The project is designed for local beneficiaries, local and diaspora donors, a small trusted admin team, and public trust verification. Read [`PRD.md`](PRD.md) as the product source of truth. [1]
 
 ## Start here
 
@@ -86,7 +86,7 @@ Server-only code must not be imported into browser components. Payment credentia
 
 Use TypeScript in strict mode. Prefer small pure functions for money formatting, validation, summary calculation, and vote-result aggregation. Use domain names consistently: `amount_paise` in persistence/API boundaries, `amountPaise` in TypeScript variables where project conventions require camelCase, and `₹` formatting only in a presentation function. Use `BIGINT`/safe integer handling in server code and never use floating-point arithmetic for financial values.
 
-Use schema validation at every API boundary. Authorization is enforced in server services, not only by hiding buttons in the UI. Derive the current admin or community member from the authenticated session; never trust a browser-supplied `admin_id`, `member_id`, role, verification status, or vote owner.
+Use schema validation at every API boundary. Authorization is enforced in server services, not only by hiding buttons in the UI. Derive the current admin or unified Member from the authenticated session; never trust a browser-supplied `admin_id`, `member_id`, role, verification tier, ID-document status, or vote owner. Donation checkout must reject unauthenticated visitors and direct them to register/login.
 
 Build UI from tokens in [`docs/design-system.md`](docs/design-system.md). Do not add ad-hoc hex colors, arbitrary spacing, or a one-off typography family. Every interactive component needs keyboard behavior, a visible focus state, an accessible name, loading/error/empty states, and a mobile layout. Color may support meaning but must never be the only carrier of donation, expense, success, failure, or moderation status.
 
@@ -101,7 +101,7 @@ Use UTC timestamps internally and ISO-8601 at API boundaries. Use deterministic 
 5. **Treat payment webhooks as security-sensitive.** Verify the raw-body signature, handle duplicate/out-of-order events idempotently, and do not mark a donation successful from an unverified browser-only signal.
 6. **Keep financial history auditable.** Do not silently delete or rewrite donations, expenses, receipts, or audit logs. Use compensating entries, controlled status transitions, and an explanation.
 7. **Quarantine community media.** Validate type and size, scan for malware, and apply moderation before exposing public URLs. A published item later removed must be soft-removed with actor, reason, and timestamp.
-8. **Do not expand scope silently.** FCRA/foreign payments, native mobile apps, online kanyadan applications, Aadhaar/e-KYC, private direct messages, and full realtime dashboard updates require explicit approval and may be out of the current phase. [1]
+8. **Do not expand scope silently.** FCRA/foreign payments, native mobile apps, online kanyadan applications, automated Aadhaar/e-KYC, private direct messages, and full realtime dashboard updates require explicit approval and may be out of the current phase. Document-based government-ID review for Tier 2 voter verification is part of the approved later voting workflow; never replace it with an unreviewed automation. [1]
 
 ## Before opening a pull request
 
@@ -113,7 +113,7 @@ The pull request description should state the problem, affected module/phase, mi
 
 ## Human sign-off gates
 
-Sunil or the designated architect must approve before merging any change that touches payment order creation, checkout confirmation, webhook signature verification, donation status transitions, ledger summary logic, receipt generation, or reconciliation. The same approval is required for vote eligibility, issue activation, ballot insertion/counting, poll-to-official-vote rules, media publication/removal, child-safety behavior, retention/deletion policy, or grievance handling.
+Sunil or the designated architect must approve before merging any change that touches payment order creation, checkout confirmation, webhook signature verification, donation status transitions, ledger summary logic, receipt generation, or reconciliation. The same approval is required for Member registration/consent, voter-ID document access or retention, vote eligibility, issue activation, ballot insertion/counting, poll-to-official-vote rules, media publication/removal, child-safety behavior, retention/deletion policy, or grievance handling.
 
 Do not merge a “temporary” bypass around a money, vote, or minors-data rule. If a provider or test environment prevents progress, isolate the adapter, use a fixture, or flag the blocker.
 

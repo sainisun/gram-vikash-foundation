@@ -13,7 +13,7 @@
 |---|---|
 | Unit | Money, summary, validation, authorization, vote aggregation, and state-transition tests pass |
 | Integration | Database constraints, migrations, admin mutations, payment webhook, receipt, and moderation flows pass |
-| End-to-end | Donor checkout-to-receipt staging flow, public ledger, admin entry, and mobile navigation pass |
+| End-to-end | Registration-gated Member checkout-to-receipt staging flow, public ledger, admin entry, and mobile navigation pass |
 | Security/privacy | No secret leakage, public PII projection review, authorization tests, upload scanning tests, and rate-limit tests pass |
 | Performance | PRD mobile targets are measured on a representative mid-range Android/4G profile: FCP under 2s and TTI under 3.5s as targets [1] |
 | Operational | Backup restore, reconciliation, alert delivery, rollback, and admin runbook rehearsal pass |
@@ -29,7 +29,7 @@ Test that pagination and filters do not change summary totals, that amounts cann
 
 ### Authorization and privacy
 
-Test every API level: public, donor-session, community-member, verified member, admin, and super-admin. Verify that a donor token cannot access another donation, a member cannot set their own verification status, a client cannot set `admin_id` or `member_id`, and public responses exclude phone, email, DOB, private receipt URLs, kanyadan case details, and individual votes.
+Test every API level: public, member-session, registered Member, Verified Voter, admin, and super-admin. Verify that an unauthenticated visitor cannot start checkout, a Member session cannot access another Member’s donation, a Member cannot set their own verification tier or document status, a client cannot set `admin_id` or `member_id`, and public responses exclude phone, email, DOB, village/ward, private receipt URLs, ID documents, kanyadan case details, and individual votes.
 
 ### Vote logic
 
@@ -103,7 +103,7 @@ Measure the PRD targets of FCP under 2 seconds and TTI under 3.5 seconds on the 
 
 ## 6. Security and abuse QA
 
-Run dependency and secret scans, verify production headers, test CSRF/session expiry, rate-limit login/donation/vote/post/report endpoints, fuzz JSON fields and pagination parameters, and attempt path traversal in upload filenames. Confirm error logs redact authorization headers, cookies, payment signatures, donor contacts, kanyadan notes, and private media URLs.
+Run dependency and secret scans, verify production headers, test CSRF/session expiry, rate-limit login/donation/vote/post/report endpoints, fuzz JSON fields and pagination parameters, and attempt path traversal in upload filenames. Confirm error logs redact authorization headers, cookies, payment signatures, Member contacts, voter ID metadata/documents, kanyadan notes, and private media URLs.
 
 Test role escalation, IDOR attempts against donations/receipts/reports, provider webhook replay, duplicate vote race, post-removal URL access, malware fixture behavior, and reporter identity disclosure. Perform a manual public API inventory before launch; undocumented debug endpoints must not be deployed.
 
@@ -114,7 +114,7 @@ Test role escalation, IDOR attempts against donations/receipts/reports, provider
 - The foundation’s approved name, contact information, registration status, trust/about copy, and donation receipt language are loaded.
 - Program descriptions, progress metrics, and images are approved and consent-reviewed.
 - Every public total is derived from database ledger rows; no hardcoded totals remain.
-- Donor-wall default is Anonymous and opt-in display is explicit.
+- Every donation path redirects unauthenticated visitors to register/login; no guest checkout exists; donor-wall default is Anonymous and opt-in display is explicit.
 - Kanyadan public content is aggregate/anonymized unless written consent and safety review exist.
 
 ### Payments and finance
@@ -127,7 +127,7 @@ Test role escalation, IDOR attempts against donations/receipts/reports, provider
 
 ### Security, privacy, and moderation
 
-- Privacy notice, donor consent language, retention/deletion process, and contact channel are approved.
+- Privacy notice, Member consent language, public-display consent, ID-document retention/deletion process, and contact channel are approved.
 - Public API and HTML have been checked for PII/minors-adjacent leakage.
 - Admin 2FA recommendation, session expiry, backups, restore, and alerting are configured.
 - Community posting/chat is disabled unless moderators, safeguarding escalation, Grievance Officer, guidelines, and retention policy are ready.

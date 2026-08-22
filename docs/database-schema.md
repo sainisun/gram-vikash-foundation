@@ -36,23 +36,37 @@ CREATE TABLE admin_users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Donor identity is separated from the financial donation record so public projections
--- can expose only an explicit opt-in display name or Anonymous.
--- PII: name, email, phone, display_name_public. Consent-sensitive: is_anonymous.
-CREATE TABLE donors (
+-- Unified registered Member identity for donation and community access. Public projections
+-- expose only an explicit opt-in display name or Anonymous.
+-- PII: name, email, phone, DOB, village/ward, display_name_public. Highly sensitive: ID document URL/type.
+CREATE TABLE members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT,
+  auth_user_id UUID NOT NULL UNIQUE,
+  name TEXT NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 160),
   display_name_public TEXT,
   email TEXT,
-  phone TEXT,
+  phone TEXT NOT NULL UNIQUE,
+  dob DATE NOT NULL,
+  village_ward TEXT NOT NULL CHECK (length(trim(village_ward)) BETWEEN 1 AND 200),
+  profile_photo_url TEXT,
   is_anonymous BOOLEAN NOT NULL DEFAULT TRUE,
   receipt_consent BOOLEAN NOT NULL DEFAULT TRUE,
+  verification_tier TEXT NOT NULL DEFAULT 'registered'
+    CHECK (verification_tier IN ('registered', 'voter_verified')),
+  id_document_url TEXT,
+  id_document_type TEXT,
+  id_document_status TEXT NOT NULL DEFAULT 'not_submitted'
+    CHECK (id_document_status IN ('not_submitted', 'submitted', 'approved', 'rejected', 'expired', 'deleted')),
+  verified_by_admin_id UUID REFERENCES admin_users(id) ON DELETE RESTRICT,
+  verified_at TIMESTAMPTZ,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (name IS NULL OR length(trim(name)) BETWEEN 1 AND 160),
   CHECK (display_name_public IS NULL OR length(trim(display_name_public)) BETWEEN 1 AND 160),
   CHECK (email IS NULL OR position('@' IN email) > 1),
-  CHECK (NOT is_anonymous OR display_name_public IS NULL)
+  CHECK (dob >= DATE '1900-01-01'), -- application code must also reject future dates
+  CHECK (NOT is_anonymous OR display_name_public IS NULL),
+  CHECK (verification_tier = 'registered' OR (id_document_url IS NOT NULL AND id_document_type IS NOT NULL AND verified_by_admin_id IS NOT NULL AND verified_at IS NOT NULL AND id_document_status = 'approved'))
 );
 
 -- Program catalog and public progress metrics used to tag donations and expenses.
@@ -71,10 +85,10 @@ CREATE TABLE programs (
 );
 
 -- Donations are the incoming financial ledger. Successful rows feed public totals.
--- PII-adjacent: donor_id, email/phone through donors. Sensitive: provider IDs and receipt URL.
+-- PII-adjacent: member_id, email/phone through members. Sensitive: provider IDs and receipt URL.
 CREATE TABLE donations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  donor_id UUID NOT NULL REFERENCES donors(id) ON DELETE RESTRICT,
+  member_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   amount_paise BIGINT NOT NULL CHECK (amount_paise > 0),
   program_id UUID REFERENCES programs(id) ON DELETE RESTRICT,
   payment_mode TEXT NOT NULL
@@ -143,33 +157,14 @@ CREATE TABLE audit_logs (
   CHECK (jsonb_typeof(diff_json) = 'object')
 );
 
--- Community members are separate from donors and carry a verification state for voting.
--- PII: name, phone, date of birth, ward, profile photo. Sensitive: verification metadata.
-CREATE TABLE community_members (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 160),
-  phone TEXT NOT NULL UNIQUE,
-  email TEXT,
-  dob DATE NOT NULL,
-  village_ward TEXT NOT NULL CHECK (length(trim(village_ward)) BETWEEN 1 AND 200),
-  profile_photo_url TEXT,
-  verification_status TEXT NOT NULL DEFAULT 'unverified'
-    CHECK (verification_status IN ('unverified', 'verified', 'rejected', 'suspended')),
-  verified_by_admin_id UUID REFERENCES admin_users(id) ON DELETE RESTRICT,
-  verified_at TIMESTAMPTZ,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (dob >= DATE '1900-01-01'), -- application code must also reject future dates
-  CHECK (verification_status = 'verified' OR verified_at IS NULL),
-  CHECK (verification_status <> 'verified' OR (verified_by_admin_id IS NOT NULL AND verified_at IS NOT NULL))
-);
+-- Community activity belongs to the unified members table; there is no separate
+-- CommunityMember identity. Posts, comments, and chat rows reference members(id).
 
 -- Community posts contain user-generated content and pass through moderation states.
 -- PII: author_id. Minors-adjacent: media may depict children and must be consent-reviewed.
 CREATE TABLE posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  author_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  author_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   text TEXT,
   media_urls TEXT[] NOT NULL DEFAULT '{}',
   status TEXT NOT NULL DEFAULT 'under_review'
@@ -190,7 +185,7 @@ CREATE TABLE posts (
 CREATE TABLE comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  author_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   text TEXT NOT NULL CHECK (length(trim(text)) BETWEEN 1 AND 3000),
   status TEXT NOT NULL DEFAULT 'published'
     CHECK (status IN ('published', 'under_review', 'removed')),
@@ -207,7 +202,7 @@ CREATE TABLE comments (
 CREATE TABLE chat_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   channel_id TEXT NOT NULL CHECK (length(trim(channel_id)) BETWEEN 1 AND 120),
-  author_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  author_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   text TEXT,
   media_url TEXT,
   status TEXT NOT NULL DEFAULT 'published'
@@ -245,7 +240,7 @@ CREATE TABLE vote_issues (
 CREATE TABLE votes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   issue_id UUID NOT NULL REFERENCES vote_issues(id) ON DELETE RESTRICT,
-  member_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  member_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   option_selected TEXT NOT NULL CHECK (length(trim(option_selected)) BETWEEN 1 AND 200),
   cast_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (issue_id, member_id)
@@ -257,7 +252,7 @@ CREATE TABLE poll_proposals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL CHECK (length(trim(title)) BETWEEN 1 AND 300),
   description TEXT,
-  proposed_by_member_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  proposed_by_member_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   status TEXT NOT NULL DEFAULT 'open'
     CHECK (status IN ('open', 'shortlisted', 'became_official_vote', 'rejected', 'closed')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -268,7 +263,7 @@ CREATE TABLE poll_proposals (
 -- PII: member_id. Never accept a client-supplied upvote count as authoritative.
 CREATE TABLE poll_proposal_upvotes (
   proposal_id UUID NOT NULL REFERENCES poll_proposals(id) ON DELETE CASCADE,
-  member_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  member_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (proposal_id, member_id)
 );
@@ -280,7 +275,7 @@ CREATE TABLE reports (
   target_type TEXT NOT NULL
     CHECK (target_type IN ('post', 'comment', 'chat_message', 'poll_proposal')),
   target_id UUID NOT NULL,
-  reported_by_member_id UUID NOT NULL REFERENCES community_members(id) ON DELETE RESTRICT,
+  reported_by_member_id UUID NOT NULL REFERENCES members(id) ON DELETE RESTRICT,
   reason TEXT NOT NULL CHECK (length(trim(reason)) BETWEEN 1 AND 2000),
   status TEXT NOT NULL DEFAULT 'open'
     CHECK (status IN ('open', 'in_review', 'resolved', 'dismissed')),
@@ -311,8 +306,14 @@ CREATE INDEX idx_donations_status_program
 CREATE INDEX idx_expenses_category_program_created
   ON expenses (category, program_id, created_at DESC);
 
-CREATE INDEX idx_donations_donor
-  ON donations (donor_id, created_at DESC);
+CREATE INDEX idx_donations_member
+  ON donations (member_id, created_at DESC);
+
+CREATE INDEX idx_members_verification
+  ON members (verification_tier, id_document_status, created_at DESC);
+
+CREATE INDEX idx_members_village_ward
+  ON members (village_ward);
 
 CREATE INDEX idx_donations_razorpay_order
   ON donations (razorpay_order_id)
@@ -372,13 +373,13 @@ CREATE INDEX idx_reports_target
 
 ## 4. Schema-level implementation notes
 
-The public summary should aggregate `donations.amount_paise` where `status = 'success'` and `expenses.amount_paise` for valid expenses. Do not add `total_raised`, `total_spent`, or `balance` columns to a mutable summary table. The balance is a derived value and should be recomputed from the ledgers on every canonical summary request. [1]
+The public summary should aggregate `donations.amount_paise` where `status = 'success'` and `expenses.amount_paise` for valid expenses. Do not add `total_raised`, `total_spent`, or `balance` columns to a mutable summary table. The balance is a derived value and should be recomputed from the ledgers on every canonical summary request. Every donation references the unified registered `members` table; an Anonymous donor is still an identified Member internally. [1]
 
 The `options` JSONB array should contain stable option identifiers and display labels, for example `[ {"id":"yes","label":"Yes"}, {"id":"no","label":"No"} ]`. The vote-casting service must validate `option_selected` against the active issue’s stored option IDs inside the same transaction. A production migration may normalize issue options into a separate table if option-level reporting or multilingual labels require it; the unique vote constraint remains mandatory.
 
 `reports.target_id` is intentionally polymorphic because PostgreSQL cannot enforce a foreign key across multiple target tables without a more complex trigger design. The moderation service must validate target existence and target-type compatibility before creating a report. If the product requires database-enforced referential integrity later, replace this with separate nullable foreign keys plus a check that exactly one is populated.
 
-The schema does not create a public view over all donor columns. Build explicit API projections that return only the fields allowed by the consent and privacy rules. In particular, never join `community_members.dob`, `phone`, or verification metadata into public posts, vote results, or proposal feeds.
+The schema does not create a public view over all Member columns. Build explicit API projections that return only the fields allowed by the consent and privacy rules. In particular, never join `members.dob`, `phone`, `village_ward`, ID-document fields, or verification metadata into public posts, vote results, donor ledgers, or proposal feeds. ID-document objects must be encrypted/restricted outside the public bucket.
 
 ## References
 

@@ -12,7 +12,7 @@
 
 Gram Vikash Foundation is a village-run charitable organization that provides free coaching for poor children, a community library, and kanyadan financial support for poor families’ daughters. The proposed platform will make trust visible: donors, beneficiaries, journalists, and the public will be able to inspect live, traceable donation and expense records instead of relying only on promises or periodic updates.
 
-The project should launch with a focused **Donation & Transparency Platform**. It will include a mobile-first public website, Razorpay online payments, offline donation and expense entry, public ledgers, live summary metrics, program pages, an opt-in donor wall, email receipts, and a secure admin panel. A separate community and voting module is intentionally sequenced after the donation platform because it introduces materially higher identity, moderation, child-safety, and governance risk. [1]
+The project should launch with a focused **Donation & Transparency Platform**. It will include a mobile-first public website, mandatory Member registration before any donation, Razorpay online payments, offline donation and expense entry linked to registered Members, public ledgers, live summary metrics, program pages, an opt-in donor wall, email receipts, and a secure admin panel. A separate community and voting module is intentionally sequenced after the donation platform because it introduces materially higher identity, moderation, child-safety, and governance risk. [1]
 
 ## Why this project matters
 
@@ -44,7 +44,7 @@ These measures should be baselined during the first month after soft launch and 
 
 ### Included in first release
 
-The first release includes the public marketing and trust site; coaching, library, and kanyadan program pages; amount and program selection; Razorpay UPI/card/netbanking checkout; manual cash/cheque donation entry; expense entry with receipt upload; public donation and expense ledgers; summary totals; opt-in donor wall; PDF receipts by email; program content editing; admin authentication; audit logs; and CSV/PDF exports.
+The first release includes the public marketing and trust site; mandatory registration with name, phone/email, password, date of birth, and village/ward before donation; coaching, library, and kanyadan program pages; amount and program selection; Razorpay UPI/card/netbanking checkout; manual cash/cheque donation entry for registered Members; expense entry with receipt upload; public donation and expense ledgers; summary totals; opt-in donor wall; PDF receipts by email; program content editing; admin authentication; audit logs; and CSV/PDF exports. “Anonymous” means the registered Member’s name is not shown publicly, not that an account is unnecessary.
 
 ### Deliberately deferred
 
@@ -71,7 +71,7 @@ The baseline stack is Next.js/React with Tailwind CSS, managed PostgreSQL, Razor
 
 ## Trust, safety, and compliance commitments
 
-The site will default donor display to Anonymous unless a donor explicitly opts in. It will show aggregate program impact rather than identifying children or vulnerable families. Kanyadan case information will be anonymized by default. Payment credentials will be handled by the payment gateway rather than stored by the application. Donor, applicant, member, and moderation data will be minimized, access-controlled, retained only under an approved policy, and subject to a documented incident process.
+The site will default registered Member display to Anonymous unless a Member explicitly opts in. Anonymous means no public donor-wall name, not an anonymous account. It will show aggregate program impact rather than identifying children or vulnerable families. Kanyadan case information will be anonymized by default. Payment credentials will be handled by the payment gateway rather than stored by the application. Voter verification will require restricted government photo-ID document review before voting access is granted. Member, applicant, and moderation data will be minimized, access-controlled, retained only under an approved policy, and subject to a documented incident process.
 
 The foundation must resolve trust/society registration, Razorpay merchant onboarding, 80G/12A status, FCRA boundaries, privacy notices, guardian consent, data retention, and the Grievance Officer/moderator role before enabling the relevant features. These are launch dependencies, not post-launch polish.
 
@@ -83,12 +83,13 @@ The foundation must resolve trust/society registration, Razorpay merchant onboar
 | Public privacy leak | Harm to donors, children, or vulnerable families | Explicit API projections, privacy review, consent workflow, least privilege |
 | Founder/admin overload | Delayed expense entry and stale transparency | Thumb-friendly quick entry, volunteer roles, daily operating checklist |
 | Legal/merchant onboarding delay | Online donations cannot launch | Start paperwork in parallel; use test mode; keep foreign/FCRA paths disabled |
+| Mandatory registration before donation | Lower first-time and NRI donor conversion due to added friction | Treat the tradeoff as deliberate; measure registration completion, checkout abandonment, and repeat giving after launch; do not reintroduce guest checkout without founder review |
 | Community abuse or unsafe media | Harm and loss of trust | Postponed Phase B, quarantine/scanning, moderation queue, escalation playbook |
-| Voting manipulation | Governance decisions lose legitimacy | Manual verification, database unique constraint, rate limiting, staged pilot |
+| Voting manipulation | Governance decisions lose legitimacy | Document-based voter verification, database unique constraint, rate limiting, staged pilot |
 
 ## Decisions requested
 
-Leadership should confirm the organization’s registration status, intended admins, domain/hosting plan, budget and timeline, offline versus online kanyadan intake for MVP, donor receipt wording, data-retention owner, and the sequence for community features. Before Phase C, leadership must choose the trending-proposal rule, voting verification method, Grievance Officer, moderators, and safeguarding escalation contacts.
+Leadership should confirm the organization’s registration status, intended admins, domain/hosting plan, budget and timeline, offline versus online kanyadan intake for MVP, donor receipt wording, data-retention owner, and the sequence for community features. Before Phase C, leadership must choose the accepted government photo-ID list, the alternative process for a village-affiliated Member without approved ID, the retention period for submitted ID documents, the trending-proposal rule, Grievance Officer, moderators, and safeguarding escalation contacts.
 
 ## Proposed approval
 

@@ -1,7 +1,7 @@
 # PRD — ग्राम विकास फाउंडेशन (Village Development Foundation)
 ### Transparent Donation & Impact Platform — Full-Stack Website
 
-**Version:** 1.0
+**Version:** 1.1
 **Owner:** Sunil (Founder)
 **Prepared for:** Engineering execution (AI coding agents — Codex/Gemini) with Claude as architect/reviewer
 **Date:** 22 Aug 2026
@@ -30,10 +30,10 @@ A village-run charitable foundation providing free coaching for poor children, a
 
 ## 3. Users & Personas
 
-1. **Donor (local or NRI)** — wants to give money, see it used well, optionally get a public/private acknowledgment and 80G receipt.
+1. **Registered Member (local donor, NRI donor, or village resident/community participant)** — must create one account with name, phone/email, password, date of birth, and village/ward affiliation. A Member can donate and, when community features are enabled, post, comment, and chat; voting requires the higher voter-verification tier. Community participation is intended for village-affiliated people, and admins may manually enforce that policy by suspending accounts that are not actually village-affiliated.
 2. **Village visitor / beneficiary family** — wants to know what's available (coaching seats, library hours, kanyadan application process).
-3. **Admin (Sunil + 1-2 trusted volunteers)** — logs donations (for offline/cash gifts), logs expenses, manages program content, approves kanyadan applications.
-4. **Public/general visitor** — journalists, other NGOs, general trust-verification browsing.
+3. **Admin (Sunil + 1-2 trusted volunteers)** — manages Member accounts and verification, logs donations (for offline/cash gifts), logs expenses, manages program content, approves kanyadan applications, and moderates the community module.
+4. **Public/general visitor** — journalists, other NGOs, general trust-verification browsing. Public visitors may browse approved content, but donation and community participation require Member registration.
 
 ---
 
@@ -41,8 +41,9 @@ A village-run charitable foundation providing free coaching for poor children, a
 
 ### MVP (Phase 1 — ship first)
 - Public marketing site (all sections from approved design prototype)
+- Mandatory Member registration and authentication before any donation; no guest or anonymous checkout path
 - Online donation via Razorpay (UPI/cards/netbanking)
-- Manual expense + offline-donation entry via admin panel
+- Manual expense + offline-donation entry via admin panel, associated with a registered Member
 - Live public ledger (donations + expenses) — polling-based, not full websocket
 - Donor wall (opt-in name display, opt-out to "Anonymous")
 - Auto-generated donation receipt (PDF via email)
@@ -61,6 +62,10 @@ A village-run charitable foundation providing free coaching for poor children, a
 - FCRA/foreign contribution handling (requires separate legal registration — flag as blocker, see §10)
 - Mobile app (site will be responsive PWA-capable instead)
 
+### Deliberate registration tradeoff
+
+Mandatory registration before donation is a deliberate founder decision in favor of a unified village community, stronger trust, accountable donor identity, and future community access. It may reduce donation conversion, especially for first-time donors and NRI donors who often prefer a minimal-friction checkout. This conversion risk should be measured after launch, but the platform must not reintroduce guest or anonymous checkout without revisiting the underlying trust and community decision.
+
 ---
 
 ## 5. Functional Requirements
@@ -68,9 +73,9 @@ A village-run charitable foundation providing free coaching for poor children, a
 ### 5.1 Public Website
 - FR1: Home page with live totals (total raised, total spent, balance, donor count)
 - FR2: Program pages — Coaching, Library, Kanyadan — each with description, progress metrics, photo gallery (adult-safe imagery only, see §9)
-- FR3: Donate flow — amount selection (preset + custom), program earmarking (optional: "donate to Kanyadan specifically" vs general fund), donor details form, payment via Razorpay checkout
+- FR3: Donate flow — amount selection (preset + custom), program earmarking (optional: "donate to Kanyadan specifically" vs general fund), authenticated Member account, payment via Razorpay checkout. If unauthenticated, the user must register or log in before payment; guest/anonymous checkout is not supported.
 - FR4: Live Transparency Dashboard — total in / total out / balance, updated on each new transaction (§7 for refresh mechanism)
-- FR5: Donation Ledger (public) — paginated list: date, donor name (or "Anonymous"), amount, program tag
+- FR5: Donation Ledger (public) — paginated list: date, Member public display name (or "Anonymous"), amount, program tag
 - FR6: Expense Ledger (public) — paginated list: date, description, category/program tag, amount, optional receipt image/PDF link
 - FR7: Donor Wall — recent/top donors, opt-in display
 - FR8: About/Trust page — registration number, audit reports (downloadable PDFs), founder note, contact info
@@ -78,15 +83,16 @@ A village-run charitable foundation providing free coaching for poor children, a
 
 ### 5.2 Donation & Payment
 - FR10: Razorpay integration — support UPI, cards, netbanking, wallets
+- FR10a: Donation checkout requires an authenticated Member session; unauthenticated users are redirected to register/login before payment. Guest or anonymous checkout is not supported.
 - FR11: On successful payment → auto-create donation record → auto-generate PDF receipt → email to donor
 - FR12: Failed/pending payment states handled gracefully with retry option
-- FR13: Admin can manually log offline (cash/cheque) donations, which appear identically on public ledger
+- FR13: Admin can manually log offline (cash/cheque) donations only for an existing registered Member; an unregistered donor must complete registration before the donation is recorded. The Member may still opt out of public name display, and the entry appears identically on the public ledger.
 
 ### 5.3 Admin Panel
 - FR14: Secure login (email+password, 2FA recommended for super-admin)
 - FR15: Dashboard: today's donations, pending kanyadan applications, quick "Add Expense" button
 - FR16: Expense entry form: date, amount, category (Coaching/Library/Kanyadan/Admin), description, optional receipt photo upload
-- FR17: Donation entry form (for offline gifts): donor name/anonymous, amount, program, date, payment mode
+- FR17: Donation entry form (for offline gifts): select an existing registered Member, amount, program, date, payment mode; public anonymity controls display only and never bypasses registration
 - FR18: Content management for program pages (edit descriptions, upload photos, update progress numbers)
 - FR19: Kanyadan application review queue (Phase 2)
 - FR20: Export ledger (donations + expenses) as CSV/PDF for offline audit
@@ -117,11 +123,13 @@ A village-run charitable foundation providing free coaching for poor children, a
 
 ## 8. Data Model (high-level)
 
-**Donor**
-`id, name, display_name_public (nullable → "Anonymous"), email, phone, is_anonymous (bool), created_at`
+**Member**
+`id, auth_user_id (managed by the authentication provider), name, phone, email, dob, village_ward, display_name_public (nullable → "Anonymous"), is_anonymous (bool), verification_tier (registered/voter_verified), id_document_url (encrypted/restricted), id_document_type, verified_by_admin_id, verified_at, created_at`
+
+Registration requires a password managed by the authentication provider; plaintext passwords must never be stored in or exposed by the Member record. One unified Member account is used for donation and community access. Tier `registered` permits donation, posting, commenting, and chatting; tier `voter_verified` is required before voting, subject to the 18+ rule.
 
 **Donation**
-`id, donor_id, amount, program_id (nullable = general fund), payment_mode (razorpay/cash/cheque), razorpay_payment_id (nullable), status (success/pending/failed), receipt_url, created_at, entered_by_admin_id (nullable, for offline entries)`
+`id, member_id, amount, program_id (nullable = general fund), payment_mode (razorpay/cash/cheque), razorpay_payment_id (nullable), status (success/pending/failed), receipt_url, created_at, entered_by_admin_id (nullable, for offline entries)`
 
 **Expense**
 `id, amount, category (coaching/library/kanyadan/admin), description, receipt_image_url (nullable), program_id (nullable), entered_by_admin_id, created_at`
@@ -144,9 +152,10 @@ A village-run charitable foundation providing free coaching for poor children, a
 
 - **Minors' data protection:** Children benefiting from coaching, and girls benefiting from kanyadan, are minors or from vulnerable families. The public site must **never** publish a child's full name + photo + family financial detail together. Use aggregate numbers ("64 children enrolled") and, if photos are used, only group/classroom shots with guardian consent on file — no individual identifying captions.
 - **Kanyadan case privacy:** Public ledger can show "Kanyadan support — ₹51,000" without naming the bride/family unless the family explicitly consents in writing to public naming. Default to anonymized entries.
-- **Donor privacy:** Donor display name is opt-in; default form should make "Show my name publicly" an explicit checkbox, not pre-checked in a way that assumes consent.
+- **Member and donor privacy:** Donation and community access require a registered, internally identified Member account. The Member's public display name is opt-in; the default form should make "Show my name publicly" an explicit checkbox, not pre-checked in a way that assumes consent. Choosing Anonymous means "do not show my name publicly," not "donate without an account."
+- **Legal ID document storage:** Documents submitted for voter verification (such as Aadhaar, Voter ID, or another approved government photo ID showing date of birth and address) must be encrypted at rest, stored in restricted private storage, accessible only to specifically authorized verifying admins, excluded from public APIs and logs, and covered by a documented retention/deletion policy for approved, rejected, expired, or withdrawn verifications.
 - **Payment data:** No card/UPI credentials touch your servers — Razorpay Checkout handles this (PCI-DSS compliance offloaded to gateway).
-- **Data retention:** Define a retention/deletion policy for donor PII and kanyadan applicant data in line with India's Digital Personal Data Protection Act (DPDP Act, 2023).
+- **Data retention:** Define a retention/deletion policy for Member PII, legal ID documents, and kanyadan applicant data in line with India's Digital Personal Data Protection Act (DPDP Act, 2023).
 
 ---
 
@@ -214,8 +223,9 @@ GET    /api/admin/audit-log           → view admin action history
 This is a significant scope addition — effectively a mini social network + a governance/voting system layered on top of the donation platform. Treat it as a **separate phase** with its own registration, moderation, and legal considerations.
 
 ### 14.1 Community — Functional Requirements
-- FR-C1: User registration (separate from donor records) — name, phone/email, village/ward, date of birth (required for vote eligibility), profile photo (optional)
-- FR-C2: Identity verification tier — self-declared DOB at signup is not sufficient for a *governance* vote; see §14.4 for verification approach
+- FR-C1: User registration — one unified Member account, not separate donor and community records — requires name, phone/email, password, village/ward, date of birth, and optional profile photo. Registration is mandatory before donation and provides the account used for community access.
+- FR-C2: Village affiliation policy — the community is intended only for village-affiliated people. Village/ward is required at registration and may be manually enforced by admins through review or suspension; geo-verification is not required for the MVP.
+- FR-C2a: Verification tier — Tier 1 Registered Members may donate, post, comment, and chat. Tier 1 is not sufficient to vote; Tier 2 Verified Voter status under §14.4 is required.
 - FR-C3: Post creation — text, images, video, PDF attachments
 - FR-C4: Comments on posts (threaded or flat — recommend flat for MVP)
 - FR-C5: Group/public chat — real-time messaging among registered members
@@ -224,7 +234,7 @@ This is a significant scope addition — effectively a mini social network + a g
 - FR-C8: Block/mute user capability
 
 ### 14.2 Voting System — Functional Requirements
-- FR-V1: Only verified 18+ registered members can vote (see §14.4)
+- FR-V1: Only Tier 2 Verified Voters who are verified 18+ registered Members can vote (see §14.4); Tier 1 registration alone is not sufficient.
 - FR-V2: One member = exactly one vote per issue (hard constraint, enforced server-side, not just UI)
 - FR-V3: Admin/moderator creates an official "issue vote" with title, description, options, start/end date
 - FR-V4: Vote results computed live but individual votes are **not** publicly attributed by default (secret ballot) — only aggregate counts shown, unless the community explicitly decides on open voting for a given issue
@@ -239,12 +249,15 @@ You described "jo trending mudda hoga wo next voting mein aayega" — this needs
 - Option C: Admin has final approval even on the trending pick (prevents manipulation/spam topics from becoming binding village decisions)
 - **Recommendation:** Option C for MVP — open community input, but admin sign-off before something becomes an official binding-feeling vote. Fully automatic (Option A) is vulnerable to coordinated brigading with so few expected total users.
 
-### 14.4 Age & Identity Verification (critical — flags a real gap)
-Self-declared date-of-birth alone is not reliable for determining who gets to influence real village decisions. Options, in increasing rigor/cost:
-1. **Self-declaration only** — cheapest, but anyone can lie about age or register twice
-2. **Admin manual verification** — new members' accounts stay "unverified" (can browse/post, cannot vote) until an admin/volunteer confirms identity and age in person or via a phone call — realistic for a single-village userbase
-3. **Aadhaar-based e-KYC** (via a verification API provider) — strongest, but adds cost, complexity, and a data-privacy/consent burden (Aadhaar data is legally sensitive in India — DigiLocker/Aadhaar XML consent flow required)
-- **Recommendation:** Option 2 for MVP. A village-scale platform can realistically have admins/volunteers verify members manually; Aadhaar e-KYC is disproportionate cost/complexity unless the platform grows well beyond one village.
+### 14.4 Two-tier registration and voter verification (final decision)
+
+Donation and community access are no longer open or anonymous. Every person must use one unified Member account with a name, phone/email, password, date of birth, and village/ward affiliation. Registration creates a **Tier 1 Registered Member** account. It is sufficient to donate, post, comment, and participate in the public community chat when Module 2 is enabled, but it is not sufficient to vote.
+
+Voting requires **Tier 2 Verified Voter** status. Before voting access is granted, the Member must submit a legal government photo ID document showing date of birth and address, such as an Aadhaar card, Voter ID, or another government-issued photo ID approved by the foundation. An authorized admin reviews the uploaded document and records `verification_tier = voter_verified`, `verified_by_admin_id`, and `verified_at` only after the document review is complete. The document URL is encrypted and restricted to verifying admins; it is never returned through public Member, community, vote, or donor APIs.
+
+The MVP workflow is document-based admin review, not a phone call or self-declaration alone: Member submits document → system stores it in restricted private storage → authorized admin reviews identity, date of birth, and village/address evidence → admin approves, rejects, or requests resubmission → the Member can vote only after approval and only when the server confirms the Member is 18 or older. The system must record rejection and expiry/withdrawal handling without exposing the document publicly. Aadhaar e-KYC or an external verification provider is not required for the MVP; any future automation needs a separate privacy, consent, security, and legal review.
+
+This two-tier model is the final product decision replacing the earlier open alternatives. The remaining open decisions are limited to which specific documents the foundation will accept, how to handle a village-affiliated person without an approved government ID, and the retention/deletion period for submitted documents.
 
 ### 14.5 Moderation & Safety (do not skip — this is the highest-risk part of this module)
 - Open posting of photos/videos from a platform tied to a children's coaching program and vulnerable families creates real risk if unmoderated. Required before launch, not "nice to have":
@@ -255,8 +268,8 @@ Self-declared date-of-birth alone is not reliable for determining who gets to in
 - Chat is the hardest thing to moderate reactively (real-time, ephemeral) — recommend starting with public group chat only (no private DMs) for MVP, so all content stays visible for moderation.
 
 ### 14.5 Data Model Additions
-**CommunityMember**
-`id, name, phone, dob, village_ward, profile_photo_url, verification_status (unverified/verified), verified_by_admin_id, verified_at, created_at`
+**Member** (shared account; core identity and verification fields are defined in §8)
+`id, auth_user_id, name, phone, email, dob, village_ward, profile_photo_url, display_name_public, is_anonymous, verification_tier (registered/voter_verified), id_document_url (encrypted/restricted), id_document_type, verified_by_admin_id, verified_at, created_at`
 
 **Post**
 `id, author_id, text, media_urls[], status (published/under_review/removed), created_at`
@@ -303,9 +316,10 @@ Given the scope jump, recommend sequencing this **after** the donation platform 
 4. Any existing domain/hosting already set up, or starting fresh?
 5. Budget/timeline constraint that should shape the phasing above?
 6. Community/voting module — which trending-poll rule (§14.3, Option A/B/C)?
-7. Age/identity verification approach for voting (§14.4) — manual admin verification acceptable, or is Aadhaar-level rigor needed?
-8. Who will act as the platform's Grievance Officer (§14.5) — legally required once posting/chat goes live?
-9. Should Module 2 (community) build only after Module 1 (donations) is stable, as recommended in §14.7, or do you need both in parallel?
+7. Which specific government photo IDs will be accepted for Tier 2 voter verification, and what approved alternative will be available to a village-affiliated Member who does not have one?
+8. What retention/deletion period should apply to submitted voter-verification documents after approval, rejection, expiry, or withdrawal, subject to legal review?
+9. Who will act as the platform's Grievance Officer (§14.5) — legally required once posting/chat goes live?
+10. Should Module 2 (community) build only after Module 1 (donations) is stable, as recommended in §14.7, or do you need both in parallel?
 
 ---
 *This PRD is a living document — update it as scope decisions above are resolved before handing sections to execution agents.*

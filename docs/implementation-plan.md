@@ -24,7 +24,7 @@
 
 | Task | Deliverable | Dependencies | Definition of done |
 |---|---|---|---|
-| A1.1 | Implement PostgreSQL migration for `admin_users`, `donors`, `programs`, `donations`, `expenses`, `kanyadan_applications`, and `audit_logs` | A0.3; `database-schema.md` | Migration applies to an empty database, rollback is documented, constraints and indexes match the schema document |
+| A1.1 | Implement PostgreSQL migration for `admin_users`, unified `members`, `programs`, `donations`, `expenses`, `kanyadan_applications`, and `audit_logs` | A0.3; `database-schema.md` | Migration applies to an empty database, rollback is documented, Member registration fields and restricted ID-document metadata exist, constraints and indexes match the schema document |
 | A1.2 | Add seed programs and non-production admin fixture | A1.1 | Seeds are idempotent, contain no real PII, and production seed execution is blocked or reviewed |
 | A1.3 | Implement audit service | A1.1 | Admin ID, action, entity, timestamp, and diff are recorded in the same transaction as every financial/admin mutation; no update/delete API exists for audit rows |
 | A1.4 | Implement money and summary query library | A1.1 | Integer-paise tests cover zero, one, large values, balance calculation, failed/pending exclusion, and no floating-point arithmetic |
@@ -35,7 +35,7 @@
 |---|---|---|---|
 | A2.1 | Add admin sign-in, session, password reset policy, and role guard | A0.3 | Unauthenticated requests receive `401`; inactive admins cannot act; session cookies are secure in production |
 | A2.2 | Implement `POST /api/admin/expenses` | A1.1–A1.4; `api-contracts.md` | Validated expense and audit row commit atomically; duplicate idempotency key cannot create a second expense; errors are safe |
-| A2.3 | Implement `POST /api/admin/donations/offline` | A1.1–A1.4 | Cash/cheque donation appears in the same ledger shape, requires admin identity, and records consent/anonymity accurately |
+| A2.3 | Implement `POST /api/admin/donations/offline` | A1.1–A1.4 | Cash/cheque donation selects an existing registered Member, requires admin identity, and records public-display consent accurately; anonymity never bypasses registration |
 | A2.4 | Build admin dashboard and mobile quick-entry forms | A2.1–A2.3; `design-system.md` | Add Expense can be completed from a phone in the target workflow; loading, error, success, and duplicate-submit states are tested |
 | A2.5 | Implement ledger CSV/PDF export | A2.2–A2.3 | Export filters are deterministic, access is audited, sensitive fields are minimized, and generated files are not public by default |
 
@@ -79,7 +79,7 @@ Do not start Phase B until Module 1 has been stable in production, the admin tea
 
 | Task | Deliverable | Dependencies | Definition of done |
 |---|---|---|---|
-| B1 | Implement `community_members`, sessions, phone verification, and account states | Phase A stable; schema/API docs | Donor and member identities remain separate; unverified members can be restricted without deleting history; privacy notice is shown |
+| B1 | Implement the unified `members` account, sessions, phone/email verification, village/ward affiliation, and account states | Phase A stable; schema/API docs | Donation and community identity use one Member record; Tier 1 Registered Members can be restricted without deleting history; the village-affiliation acceptance policy and privacy notice are shown |
 | B2 | Implement post creation, feed, comments, reports, block/mute support tables | B1; approved community guidelines | Rate limits, ownership checks, published/under-review/removed states, and report creation work; no private DMs |
 | B3 | Implement upload quarantine, file validation, malware scan adapter, and controlled URLs | B2; storage/scanner credentials | Oversize/unsupported/malicious fixtures are rejected or quarantined; media is not public before required checks |
 | B4 | Implement moderation queue and soft removal | B2–B3; `content-moderation-playbook.md` | Moderator actions record actor/reason/time; removed content is no longer public; reporters’ identities are protected |
@@ -94,7 +94,7 @@ Voting should be built only after Phase B demonstrates that identity verificatio
 
 | Task | Deliverable | Dependencies | Definition of done |
 |---|---|---|---|
-| C1 | Implement manual member verification workflow | Phase B pilot; PRD decision | Verification evidence and reviewer are recorded; unverified members cannot vote; no Aadhaar/e-KYC is added without separate approval |
+| C1 | Implement document-based Tier 2 voter-verification workflow | Phase B pilot; PRD decision | Approved government photo ID upload is encrypted/restricted; accepted document type, reviewer, outcome, and timestamp are recorded; Tier 1 Members cannot vote; ID-less handling is documented; automated Aadhaar e-KYC is not added without separate approval |
 | C2 | Implement poll proposals and one-member-one-upvote | C1; schema/API docs | Proposal creation is rate limited and moderated; supporting unique key prevents duplicate upvotes; trend rule is published |
 | C3 | Implement official issue lifecycle | C2 | Admin creates issue with stable options and dates; activation/closure is audited; post-activation options cannot silently change |
 | C4 | Implement vote casting and aggregate results | C3 | Server derives member identity; `UNIQUE (issue_id, member_id)` rejects concurrent duplicates; results never expose individual ballots |
@@ -115,7 +115,7 @@ Voting should be built only after Phase B demonstrates that identity verificatio
 | Child/guardian media consent process | Coaching photos, kanyadan stories, community uploads | Foundation safeguarding owner; no identifying minor content without documented consent |
 | Grievance Officer and complaint process | Community posts/comments/chat/voting module | Founder designates role and publishes process before Phase B |
 | Trending proposal rule | Official issue creation | Founder/community governance decision before Phase C |
-| Age/identity verification method | Voting eligibility | Founder/architect approve manual verification or another justified method |
+| Government-ID verification policy | Voting eligibility | Founder/architect approve the accepted photo-ID list, secure document workflow, retention period, and alternative for a village-affiliated Member without approved ID |
 | Moderator staffing and escalation contacts | Any user-generated content feature | Founder appoints moderators and child-safety escalation path |
 
 ## 5. Agent execution protocol

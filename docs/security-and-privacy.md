@@ -19,11 +19,11 @@ The database schema is not a public API. Every endpoint must select an explicit 
 
 | Entity/fields | Classification | Public by design? | Required handling |
 |---|---|---|---|
-| `donors.name`, `email`, `phone` | PII / contact | No | Encrypt in transit and at rest where provider supports it; admin-only; redact logs |
-| `donors.display_name_public`, `is_anonymous` | Consent-sensitive public profile | Only when opted in | Default to Anonymous; public display requires explicit affirmative checkbox |
-| `donations.amount_paise`, `created_at`, approved program tag | Financial record; public ledger projection | Yes for successful rows, subject to policy | Preserve source row; expose amount/date/program, not donor contact or provider secrets |
+| `members.name`, `email`, `phone` | PII / contact | No | Encrypt in transit and at rest where provider supports it; admin-only; redact logs |
+| `members.display_name_public`, `is_anonymous` | Consent-sensitive public profile | Only when opted in | Default to Anonymous; public display requires explicit affirmative checkbox |
+| `donations.amount_paise`, `created_at`, approved program tag | Financial record; public ledger projection | Yes for successful rows, subject to policy | Preserve source row; expose amount/date/program and opt-in display name/Anonymous, not Member contact or provider secrets |
 | `donations.razorpay_*`, `provider_event_id` | Payment operational secret-adjacent | No | Server-only, strict admin access, redact logs, never expose raw payload |
-| `donations.receipt_url` | Private document reference | No by default | Signed, short-lived access; donor self-access or admin audit |
+| `donations.receipt_url` | Private document reference | No by default | Signed, short-lived access; Member self-access or admin audit |
 | `expenses.amount_paise`, category, description, date | Financial record; public ledger projection | Usually yes after review | Avoid sensitive vendor/beneficiary details in description; expose approved receipt availability only |
 | `expenses.receipt_image_url` | Sensitive document | No by default | Private object, admin access, malware scan, signed URLs, audit access |
 | `programs.name`, `slug`, description, approved metrics | Public content | Yes | Content moderation/approval; no hidden beneficiary details in copy or metadata |
@@ -32,8 +32,9 @@ The database schema is not a public API. Every endpoint must select an explicit 
 | `admin_users.name`, email, role | Staff PII / authorization | No | Admin-only; least privilege; inactive rather than deleted when referenced by audit |
 | `password_hash`, 2FA state | Credential/security data | No | Strong password hashing, secret manager, no logs, rotate/revoke on incident |
 | `audit_logs` actor/entity/diff | Accountability record; may contain PII | No | Append-only application behavior, admin-only, redact secrets, protect from ordinary edits |
-| `community_members.name`, phone, email, DOB, ward | PII; DOB is eligibility-sensitive | No | Phone verification, encrypted transport, strict member/admin projection, do not publish DOB |
-| `verification_status`, reviewer, verification time | Eligibility-sensitive | No | Admin-only; voting service reads server-side; never accept client-supplied status |
+| `members.name`, phone, email, DOB, village/ward | PII; DOB is eligibility-sensitive | No | Phone/email verification as configured, encrypted transport, strict Member/admin projection, do not publish DOB |
+| `verification_tier`, ID document URL/type/status, reviewer, verification time | Eligibility-sensitive / highly sensitive identity evidence | No | Admin-only; encrypted/restricted document storage; voting service reads server-side; never accept client-supplied status |
+| `id_document_url` object and document image/PDF | Highly sensitive government-ID evidence | No | Encrypt at rest, private bucket, short-lived signed access only for verifying admins, no logs/analytics/public URLs |
 | `posts.text`, media, author ID | User-generated content; potentially sensitive | Published subset only | Moderation state controls visibility; remove identifying minor content; retain minimal evidence |
 | `comments.text`, author ID | User-generated content / PII link | Published subset only | Report, moderate, soft-remove; do not expose private account fields |
 | `chat_messages` text/media/author | Real-time user content; sensitive | Published channel only | Public group chat only in MVP; persist for moderation; rate limit and soft-remove |
@@ -45,15 +46,17 @@ The database schema is not a public API. Every endpoint must select an explicit 
 
 ## 3. Authentication and authorization
 
-### Donors
+### Unified Members
 
-A donor may donate without a full account, but the system issues a short-lived donation-session token bound to the donation intent. That token can view only the corresponding status and receipt. An email or phone address is not sufficient by itself to authorize access to all donations associated with that contact. Public donor-wall display is a separate consent decision and defaults to Anonymous.
+Donation and community access require one registered Member account. Registration collects the approved name, phone/email, password through the authentication provider, date of birth, and village/ward affiliation. A Tier 1 Registered Member can donate, post, comment, and chat when the relevant community features are enabled. The community is intended for village-affiliated people; admins may manually enforce that acceptance policy through review or suspension even though geo-verification is not required for the MVP.
 
-### Community members
+Public donor-wall display is a separate consent decision. The Member remains identified internally for the ledger even when `is_anonymous = true`; Anonymous means “do not show my name publicly,” not “donate without an account.” Member sessions can view only their own donation status and receipt. An email or phone address is not sufficient by itself to authorize access to all donations associated with that contact.
 
-Community registration is separate from the donor record. Phone verification and rate limiting are required before posting. An `unverified` member may browse and, if the community policy permits, post subject to moderation, but cannot vote. The voting service checks the session-derived member ID, active account status, verification status, age/eligibility decision, issue window, and suspension status on the server. A browser cannot set its own `member_id`, DOB, verification state, or role.
+### Verified Voters
 
-Manual admin verification is the recommended MVP approach in the PRD. Aadhaar/e-KYC should not be added as a shortcut: it would require separate provider, consent, privacy, and legal design. [1]
+Tier 1 registration is not sufficient to vote. A Member must submit an approved government photo ID document showing date of birth and address, such as an Aadhaar card, Voter ID, or another approved document. An authorized admin reviews the upload and records `verification_tier = voter_verified`, `verified_by_admin_id`, and `verified_at` only after approval. The raw document is encrypted/restricted, excluded from public APIs and logs, and accessible only to specifically authorized verifying admins. Rejected, expired, withdrawn, and deleted document states must be handled by the retention policy.
+
+The voting service checks the session-derived Member ID, `voter_verified` tier, approved-document state, server-calculated 18+ eligibility, active account status, issue window, and suspension status. A browser cannot set its own `member_id`, DOB, verification tier, ID-document status, or role. Automated Aadhaar e-KYC is not required for the MVP and must not be added without separate provider, consent, privacy, security, and legal design. [1]
 
 ### Administrators
 
@@ -61,11 +64,12 @@ Admin sessions require secure cookies, CSRF protection for cookie-authenticated 
 
 ### Authorization matrix
 
-| Action | Public | Donor session | Community member | Verified member | Admin | Super-admin |
+| Action | Public | Member session | Registered Member | Verified Voter | Admin | Super-admin |
 |---|---:|---:|---:|---:|---:|---:|
+| Register a Member account | Yes | No | No | No | No | No |
 | Read approved programs/summary/ledgers | Yes | Yes | Yes | Yes | Yes | Yes |
-| Read own receipt/status | No | Own only | No | No | Any, audited | Any, audited |
-| Create online donation | Yes | Yes | Yes | Yes | Yes | Yes |
+| Read own receipt/status | No | Own only | Own only | Own only | Any, audited | Any, audited |
+| Create online donation | No | Yes | Yes | Yes | Yes | Yes |
 | Add offline donation/expense | No | No | No | No | Yes | Yes |
 | Edit program content | No | No | No | No | Yes | Yes |
 | Create post/comment/report | No | No | Yes | Yes | Optional support | Optional support |
@@ -99,8 +103,9 @@ The following are **proposed operational defaults**, not legal retention advice.
 | Data class | Proposed default | Deletion/anonymization approach |
 |---|---:|---|
 | Pending/failed donation intent with no dispute | 180 days after closure | Delete contact fields or anonymize; retain minimal reconciliation reference if required |
-| Successful donation and expense ledger | Duration required by accounting/tax/legal policy; provisional 8 years after financial close | Do not delete source rows casually; suppress unnecessary donor PII and use compensating corrections |
-| Donor contact used for receipt | 8 years after last required financial record, subject to counsel | Remove or irreversibly tokenize contact fields once receipt/legal need ends |
+| Successful donation and expense ledger | Duration required by accounting/tax/legal policy; provisional 8 years after financial close | Do not delete source rows casually; suppress unnecessary Member PII and use compensating corrections |
+| Member contact used for receipt | 8 years after last required financial record, subject to counsel | Remove or irreversibly tokenize contact fields once receipt/legal need ends |
+| Voter-verification ID document | Provisional: delete or irreversibly redact after the approved review/appeal window; final period requires counsel | For rejected submissions, delete after the rejection/appeal window; for expired or withdrawn approvals, delete after the approved re-verification window; retain only minimal verification outcome, actor, and timestamp |
 | Receipt PDFs and expense evidence | Same as associated financial record unless a shorter policy is approved | Private deletion job with audit marker; retain only necessary metadata |
 | Kanyadan application case data | Until case purpose and approved safeguarding/accounting period end; provisional 3 years after closure | Restrict first, then delete/anonymize with a documented case-owner decision |
 | Community member account/profile | While active and for a short abuse/complaint window after closure; provisional 12 months | Delete profile PII while retaining non-identifying moderation/audit facts where justified |
