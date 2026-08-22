@@ -19,7 +19,8 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/system-design.md`](docs/system-design.md) | Database posture, caching, polling versus realtime, vote integrity, moderation pipeline, reconciliation, and disaster recovery |
 | [`docs/database-schema.md`](docs/database-schema.md) | PostgreSQL DDL, constraints, indexes, foreign-key behavior, and data-sensitivity annotations |
 | [`docs/api-contracts.md`](docs/api-contracts.md) | JSON API methods, paths, authorization, request/response shapes, errors, and rate limits |
-| [`docs/folder-structure.md`](docs/folder-structure.md) | Complete file-level Next.js tree, route groups, access rules, auth helpers, naming, and feature placement guide |
+| [`docs/folder-structure.md`](docs/folder-structure.md) | Original file-level Next.js target structure, route groups, access rules, auth helpers, naming, and feature placement guide |
+| [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) | Active React, Express, tRPC, MySQL, and managed-auth implementation baseline with production gates |
 | [`docs/implementation-plan.md`](docs/implementation-plan.md) | Sequenced Phase A/B/C task plan with dependencies, definitions of done, and human checkpoints |
 | [`docs/security-and-privacy.md`](docs/security-and-privacy.md) | Data classification, access control, payment security, minors’ privacy, retention, uploads, and incidents |
 | [`docs/content-moderation-playbook.md`](docs/content-moderation-playbook.md) | Day-to-day moderation, reports, removals, grievance handling, templates, and child-safety escalation |
@@ -28,11 +29,11 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 
 ## Recommended implementation order
 
-Build the Donation & Transparency Platform first: unified Member registration/authentication, database and audit foundation, offline donation/expense entry, public ledgers and summary, Razorpay and receipts, then mobile/low-bandwidth QA and soft launch. Keep community posting/chat disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Add voting only after the community pilot proves that document-based voter verification and moderation operate reliably. [1]
+Build the Donation & Transparency Platform first using the active workspace baseline in [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md): unified Member profile completion through managed authentication, database and audit foundation, offline donation/expense entry, public ledgers and summary, gated payment readiness, then mobile/low-bandwidth QA and soft launch. Keep community posting/chat disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Add voting only after the community pilot proves that document-based voter verification and moderation operate reliably. [1]
 
 ## Local development setup
 
-The repository currently contains documentation only; the application scaffold is not yet committed. When implementation begins, use the selected package manager and add the actual commands to this section. The intended baseline is:
+The repository contains the planning documentation. The initialized application workspace uses React, Express, tRPC, Drizzle, MySQL/TiDB, and managed OAuth; see the reconciliation guide before starting implementation. The intended local setup is:
 
 ```bash
 git clone https://github.com/sainisun/gram-vikash-foundation.git

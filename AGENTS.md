@@ -9,7 +9,8 @@ Gram Vikash Foundation is a village-run charitable platform for free coaching, a
 Before changing code, read these documents in order:
 
 1. [`PRD.md`](PRD.md) — requirements, privacy boundaries, open decisions, and rollout scope.
-2. [`docs/architecture-design.md`](docs/architecture-design.md) — system boundaries and critical flows.
+2. [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) — active workspace architecture, documentation overrides, and production gates.
+3. [`docs/architecture-design.md`](docs/architecture-design.md) — system boundaries and critical flows.
 3. [`docs/design-system.md`](docs/design-system.md) — visual tokens, component states, responsive behavior, and accessibility.
 4. [`docs/system-design.md`](docs/system-design.md) — transactions, caching, reconciliation, moderation, and recovery.
 5. [`docs/database-schema.md`](docs/database-schema.md) — PostgreSQL DDL, constraints, indexes, and data sensitivity.
@@ -21,22 +22,22 @@ The remaining documents define delivery, privacy operations, moderation, testing
 
 | Layer | Baseline |
 |---|---|
-| Frontend | Next.js/React with Tailwind CSS; mobile-first, SSR-friendly public pages |
-| Backend | Next.js route handlers or a lightweight Node service layer |
-| Database | Managed PostgreSQL through Supabase, Neon, or equivalent |
+| Frontend | React 19, Vite, Wouter, and Tailwind CSS; mobile-first public pages |
+| Backend | Express 4 with typed tRPC 11 procedures |
+| Database | Managed MySQL/TiDB with Drizzle ORM and generated migrations |
 | Payments | Razorpay Checkout, Orders, server-side verification, and webhooks |
-| Storage | Supabase Storage or Cloudflare R2 with private objects and controlled URLs |
-| Auth | NextAuth.js or Supabase Auth; application-level role/verification checks |
-| Email | Resend or SendGrid for receipts and operational notifications |
-| Hosting | Vercel plus managed PostgreSQL |
-| Monitoring | Vercel Analytics/Sentry plus application audit logs |
-| Realtime | Phase 1 polling; optional Supabase Realtime/Firebase for Phase 2 chat |
+| Storage | Workspace S3 helpers with private objects and controlled URLs |
+| Auth | Managed Manus OAuth; application-level Member/profile, role, and feature-flag checks |
+| Email | Deferred until the receipt provider and required live-payment approvals are supplied |
+| Hosting | Managed WebDev Autoscale plus managed MySQL/TiDB |
+| Monitoring | Application audit logs plus configured platform monitoring |
+| Realtime | Phase 1 polling-style refresh; community/chat remains disabled |
 
 Do not introduce a new infrastructure service merely to solve a local code organization problem. The expected initial usage is village-scale; favor auditable, recoverable components. [1]
 
 ## Folder and file structure
 
-Use a domain-oriented structure. The exact framework layout may vary, but new code should have an obvious home.
+Use the active workspace structure in [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md). The earlier Next.js tree below is an archived target reference only and must not override the initialized project layout.
 
 ```text
 /
@@ -86,7 +87,7 @@ Server-only code must not be imported into browser components. Payment credentia
 
 Use TypeScript in strict mode. Prefer small pure functions for money formatting, validation, summary calculation, and vote-result aggregation. Use domain names consistently: `amount_paise` in persistence/API boundaries, `amountPaise` in TypeScript variables where project conventions require camelCase, and `₹` formatting only in a presentation function. Use `BIGINT`/safe integer handling in server code and never use floating-point arithmetic for financial values.
 
-Use schema validation at every API boundary. Authorization is enforced in server services, not only by hiding buttons in the UI. Derive the current admin or unified Member from the authenticated session; never trust a browser-supplied `admin_id`, `member_id`, role, verification tier, ID-document status, or vote owner. Donation checkout must reject unauthenticated visitors and direct them to register/login.
+Use Zod validation in every tRPC procedure. Authorization is enforced in server procedures/services, not only by hiding buttons in the UI. Derive the current admin or unified Member from the managed-auth `ctx.user` and linked Member record; never trust a browser-supplied `admin_id`, `member_id`, role, verification tier, ID-document status, or vote owner. Donation checkout must reject unauthenticated visitors and direct them to sign in.
 
 Build UI from tokens in [`docs/design-system.md`](docs/design-system.md). Do not add ad-hoc hex colors, arbitrary spacing, or a one-off typography family. Every interactive component needs keyboard behavior, a visible focus state, an accessible name, loading/error/empty states, and a mobile layout. Color may support meaning but must never be the only carrier of donation, expense, success, failure, or moderation status.
 
