@@ -1,0 +1,2 @@
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function MemberVerificationPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · voter verification</p><h1>Restricted document review is not active.</h1><div className="gate">No identity documents can be uploaded, reviewed, or retained until the privacy, retention, reviewer authorization, and governance approvals open the server-controlled voter-document feature gate.</div></main>; }

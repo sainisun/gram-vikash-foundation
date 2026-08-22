@@ -1,0 +1,1 @@
+export default function ChatPage() { return <main className="main"><p className="eyebrow">Group chat</p><h1>Not active yet.</h1><div className="gate">Realtime group chat remains behind the community feature flag and moderation readiness gate.</div></main>; }

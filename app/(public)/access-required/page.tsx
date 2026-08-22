@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function AccessRequiredPage() { return <main className="main"><p className="eyebrow">Member or administrator access</p><h1>Sign in is required for this area.</h1><div className="gate"><p>The protected route is reserved for an authenticated Member or authorized administrator. The managed-auth callback bridge is being migrated into the Next.js API layer; no anonymous access is granted.</p></div><Link className="button" href="/">Return to the public site</Link></main>; }

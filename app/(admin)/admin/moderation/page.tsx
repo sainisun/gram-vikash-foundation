@@ -1,0 +1,2 @@
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function ModerationPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · moderation</p><h1>Moderation queue is not active.</h1><div className="gate">Community posts, reports, and chat are unavailable until a moderation owner, Grievance Officer process, safeguarding escalation route, and retention controls are approved.</div></main>; }

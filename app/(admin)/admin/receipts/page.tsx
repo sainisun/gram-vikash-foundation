@@ -1,0 +1,3 @@
+import { getFeatureGates } from "@/server/db";
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function AdminReceiptsPage() { await requireManagedAdmin(); const gates = await getFeatureGates(); return <main className="main"><p className="eyebrow">Admin · receipt readiness</p><h1>Receipt workflow status.</h1><div className="gate"><strong>Not active.</strong><p>{gates.payments_live ? "Payment events have not yet been mapped to receipts." : "Receipt generation is disabled until the server-controlled live payment gate and required Razorpay/finance approvals are complete."}</p></div></main>; }

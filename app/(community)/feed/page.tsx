@@ -1,0 +1,1 @@
+export default function CommunityFeedPage() { return <main className="main"><p className="eyebrow">Community</p><h1>Community features are intentionally gated.</h1><div className="gate">Posts, comments, reports, and group chat require a named moderation owner, Grievance Officer process, safeguarding escalation, retention controls, and a human go/no-go decision.</div></main>; }

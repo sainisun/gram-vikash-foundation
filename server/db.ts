@@ -46,6 +46,19 @@ export async function getMemberByUserId(userId: number) {
   return rows[0];
 }
 
+export async function getMemberDonationHistory(userId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ id: donations.id, amountPaise: donations.amountPaise, paymentMode: donations.paymentMode, source: donations.source, status: donations.status, receivedAt: donations.receivedAt, succeededAt: donations.succeededAt, createdAt: donations.createdAt, programName: programs.name })
+    .from(donations)
+    .innerJoin(members, eq(donations.memberId, members.id))
+    .leftJoin(programs, eq(donations.programId, programs.id))
+    .where(eq(members.userId, userId))
+    .orderBy(desc(donations.createdAt), desc(donations.id))
+    .limit(limit);
+  return rows.map(row => ({ ...row, amountPaise: toSafeAmount(row.amountPaise), programName: row.programName ?? "General fund", donatedAt: row.succeededAt ?? row.receivedAt ?? row.createdAt }));
+}
+
 export async function saveMemberProfile(input: {
   userId: number;
   fullName: string;
@@ -227,6 +240,13 @@ export async function getFeatureGates() {
   const rows = await db.select().from(featureFlags).where(inArray(featureFlags.key, [...known]));
   const found = new Map(rows.map(row => [row.key, row.enabled]));
   return Object.fromEntries(known.map(key => [key, found.get(key) ?? false]));
+}
+
+export async function getAuditLogEntries(limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({ id: auditLogs.id, actorUserId: auditLogs.actorUserId, action: auditLogs.action, entityType: auditLogs.entityType, entityId: auditLogs.entityId, createdAt: auditLogs.createdAt })
+    .from(auditLogs).orderBy(desc(auditLogs.createdAt), desc(auditLogs.id)).limit(limit);
 }
 
 export async function prepareFinancialExport(input: { actorUserId: number; scope: "donations" | "expenses" | "both" }) {

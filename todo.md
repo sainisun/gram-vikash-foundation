@@ -25,3 +25,10 @@
 - [x] Implement deterministic, admin-only ledger export preparation with minimized public-safe fields and audit evidence.
 - [x] Add public trust/about content that explains transparency, privacy, payment readiness, and feature gates without making unsupported legal claims.
 - [x] Document the A2 human-review evidence still required before payment activation or community work can begin.
+- [x] Define and document the Next.js App Router migration boundary, including data/auth compatibility and rollback approach.
+- [x] Replace the React/Vite shell with a Next.js App Router foundation using `app/(public)`, `app/(donor)`, `app/(community)`, `app/(admin)`, and `app/api` route groups.
+- [x] Complete the remaining Next.js public and Member migration: published-program detail, donor wall, and private donation history.
+- [x] Add a Member-facing receipt-readiness status surface and API route that explains the current server-controlled payment gate.
+- [x] Complete the remaining Next.js admin migration: ledger review, controlled export preparation, and receipt-readiness status.
+- [x] Add remaining public and admin Next.js route handlers for program detail, donor-wall data, Member history, financial export preparation, and receipt readiness.
+- [x] Verify and push the completed Next.js migration to GitHub with payment, community, and voting gates still disabled.

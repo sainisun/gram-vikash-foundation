@@ -1,0 +1,3 @@
+import { getAuditLogEntries } from "@/server/db";
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function AuditLogPage() { await requireManagedAdmin(); const events = await getAuditLogEntries(100); return <main className="main"><p className="eyebrow">Admin · audit log</p><h1>Who changed what.</h1><section className="ledger">{events.length ? events.map(event => <p key={event.id}><strong>{event.action}</strong> · {event.entityType}/{event.entityId} · actor #{event.actorUserId} · {new Date(event.createdAt).toLocaleString()}</p>) : <p>No administrative audit events recorded yet.</p>}</section></main>; }
