@@ -1,8 +1,5 @@
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
 import { getFeatureGates } from "@/server/db";
 import { requireMember } from "@/lib/auth/session";
 
-export default async function DonatePage() {
-  await requireMember();
-  const gates = await getFeatureGates();
-  return <main className="main"><p className="eyebrow">Member · donation</p><h1>Donate from your verified Member record.</h1><section className="ledger"><p>Donation ownership and any public donor-wall preference are derived from your authenticated Member profile. Guest checkout is not available.</p><section className="gate"><strong>Live payment: {gates.payments_live ? "approval pending" : "not active"}</strong><p>Razorpay checkout will remain unavailable until merchant onboarding, webhook verification, reconciliation ownership, finance approval, and the documented launch gate are complete.</p></section></section></main>;
-}
+export default async function DonatePage() { await requireMember(); const gates = await getFeatureGates(); return <ApprovalGate eyebrow="Member · donation" title={gates.payments_live ? "Payment launch verification is still pending." : "Online donation checkout is not active yet."} summary="Every donation will remain linked to your authenticated Member record, and public recognition will always use your saved display preference. Guest checkout is not available." requirements={["Merchant onboarding and approved payment scope", "Razorpay test-mode order and webhook verification", "Reconciliation ownership and receipt wording review", "A4 staged-donation and finance approval"]} primaryHref="/my-donations" primaryLabel="Return to Member dashboard" />; }

@@ -1,2 +1,3 @@
-import { requireManagedAdmin } from "@/lib/auth/session";
-export default async function ModerationReportsPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · moderation reports</p><h1>Reports are not active.</h1><section className="gate">Report intake will remain disabled with community features until the named moderation owner, grievance process, and safeguarding controls are approved.</section></main>; }
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
+
+export default function ModerationReportsPage() { return <ApprovalGate eyebrow="Admin · community reports" title="Community reports are not being collected." summary="The report system stays closed until user-generated content can be handled by trained, accountable moderators under the approved policy." requirements={["Report retention and reporter-privacy decision", "Moderator actor/reason audit process", "Grievance Officer contact path", "Pilot operations review"]} primaryHref="/admin/moderation" primaryLabel="View moderation boundary" />; }

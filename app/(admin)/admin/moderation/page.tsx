@@ -1,2 +1,3 @@
-import { requireManagedAdmin } from "@/lib/auth/session";
-export default async function ModerationPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · moderation</p><h1>Moderation queue is not active.</h1><div className="gate">Community posts, reports, and chat are unavailable until a moderation owner, Grievance Officer process, safeguarding escalation route, and retention controls are approved.</div></main>; }
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
+
+export default function ModerationPage() { return <ApprovalGate eyebrow="Admin · moderation" title="Moderation operations are not open yet." summary="No user-generated community content is active, so there is no moderation queue to operate. The administrative interface remains deliberately closed until staffing and safeguarding evidence are approved." requirements={["Founder-appointed moderation owner and backup", "Published guidelines and Grievance Officer details", "Safeguarding escalation and privacy retention policy", "Tested report, removal, and appeal workflow"]} primaryHref="/admin" primaryLabel="Return to approved admin work" />; }

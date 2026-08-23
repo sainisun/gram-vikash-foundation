@@ -44,7 +44,7 @@
 - [x] Push the mismatch remediation to GitHub after repository credentials are reconnected.
 - [x] Reconcile the Next.js Member registration/login entrypoint with the managed-auth session bridge and remove stale migration-only access messaging.
 - [x] Stabilize standalone TypeScript checks against Next.js generated-cache churn.
-- [ ] Review the current implementation plan gates and record the next safe Phase A readiness tasks.
+- [x] Review the current implementation plan gates and record the next safe Phase A readiness tasks.
 - [x] Implement safe operational readiness enhancements that do not activate live payments, community, voter-document review, or voting.
 - [x] Strengthen gated Phase B preparation and keep approval dependencies explicit.
 - [x] Validate and synchronize the next implementation phase to GitHub.
@@ -53,3 +53,19 @@
 - [x] Document managed production environment conventions, required variable names, and feature-gate ownership without exposing secret values.
 - [x] Update Phase B gate documentation to name required operating evidence before community activation.
 - [x] Diagnose and fix the mobile dashboard runtime error observed after the visibility-aware refresh enhancement.
+- [x] Audit incomplete Phase A code paths, data states, and responsive UI against the public, Member, and admin product scope.
+- [x] Complete polished public website layouts, transparent ledger views, loading/empty/error states, and navigation.
+- [x] Complete the Member dashboard experience, including profile, donation history, receipt readiness, and protected empty states.
+- [x] Complete the admin dashboard experience, including navigation, financial operations, program management, ledger review, exports, audit evidence, and feedback states.
+- [x] Polish disabled payment, community, voter-review, and voting interfaces as explicit non-operational gated screens.
+- [x] Run complete functional, responsive, accessibility, build, and regression validation before discussing test credentials.
+- [ ] Synchronize the completed Phase A codebase and UI to GitHub.
+- [x] Polish and verify public ledger routes with consistent responsive, empty, unavailable, and manual-refresh states.
+- [x] Add and verify visible success, validation, duplicate-submit, empty, and error feedback states across each admin workflow.
+- [x] Standardize and verify the remaining payment-gated and dynamic protected gate pages with the ApprovalGate visual system.
+- [x] Run complete functional, responsive, accessibility, build, and regression validation before discussing test credentials.
+- [x] Polish and verify the split donation and expense ledger routes with matching manual-refresh and unavailable states.
+- [x] Add and verify consistent empty, unavailable, and action-feedback states in ledger review, exports, audit evidence, and receipt-readiness admin views.
+- [x] Perform and document keyboard, focus, label, contrast, and zoom validation across public, Member, and admin flows.
+- [x] Verify focus and reduced-motion CSS, the accessibility validation record, and final responsive route checks before closing accessibility validation.
+- [x] Run browser-level keyboard focus-order and 200% reflow checks for representative public, Member, and admin routes.

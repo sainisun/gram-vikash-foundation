@@ -1,6 +1,4 @@
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
 import { requireMember } from "@/lib/auth/session";
 
-export default async function FeedPage() {
-  await requireMember();
-  return <main className="main"><p className="eyebrow">Member · community</p><h1>Community features are intentionally gated.</h1><section className="gate">Posts, comments, reports, and group chat require a named moderation owner, Grievance Officer process, safeguarding escalation, retention controls, and a human go/no-go decision.</section></main>;
-}
+export default async function FeedPage() { await requireMember(); return <ApprovalGate eyebrow="Member · community" title="Community space is not open yet." summary="Posts, comments, reports, and group chat are intentionally unavailable until the foundation has the operating safeguards to respond to real people safely." requirements={["Named moderation owner and backup coverage", "Published Grievance Officer process", "Safeguarding escalation contacts", "Approved privacy, retention, and removal process"]} primaryHref="/trust" primaryLabel="See the community activation boundary" />; }

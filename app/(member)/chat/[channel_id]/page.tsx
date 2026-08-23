@@ -1,6 +1,4 @@
-export default async function ChannelPage({ params }: { params: Promise<{ channel_id: string }> }) {
-  const { requireMember } = await import("@/lib/auth/session");
-  await requireMember();
-  const { channel_id } = await params;
-  return <main className="main"><p className="eyebrow">Member · channel {channel_id}</p><h1>Group chat is not active.</h1><section className="gate">Chat remains feature-gated until moderation, safeguarding, retention, and operational ownership are approved.</section></main>;
-}
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
+import { requireMember } from "@/lib/auth/session";
+
+export default async function ChannelPage({ params }: { params: Promise<{ channel_id: string }> }) { await requireMember(); const { channel_id } = await params; return <ApprovalGate eyebrow={`Member · channel ${channel_id}`} title="This chat channel is not active." summary="Channel access is blocked because group chat requires the same moderation, safeguarding, rate-limit, and outage-response safeguards as the broader community pilot." requirements={["Community pilot and moderator coverage", "Rate-limit and report workflow tests", "Safeguarding and incident escalation", "Recorded human go/no-go decision"]} primaryHref="/chat" primaryLabel="View group-chat readiness" />; }

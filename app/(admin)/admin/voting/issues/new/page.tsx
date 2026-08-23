@@ -1,2 +1,3 @@
-import { requireManagedAdmin } from "@/lib/auth/session";
-export default async function NewVotingIssuePage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · new voting issue</p><h1>Voting administration is not active.</h1><section className="gate">No issue, ballot, or result can be created until voter verification, one-vote integrity, governance approval, and privacy controls are operational.</section></main>; }
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
+
+export default function NewVotingIssuePage() { return <ApprovalGate eyebrow="Admin · official issue" title="Official voting issues cannot be created yet." summary="The issue lifecycle remains closed until the community pilot, voter verification, proposal governance, and ballot-secrecy controls have all passed human review." requirements={["Approved trending-to-official rule", "Verified Voter workflow and test evidence", "Locked option and activation/closure audit procedure", "Human governance approval"]} primaryHref="/admin" primaryLabel="Return to approved admin work" />; }

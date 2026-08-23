@@ -1,3 +1,2 @@
-import { requireManagedAdmin } from "@/lib/auth/session";
 import ExportPanel from "./export-panel";
-export default async function AdminExportsPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · exports</p><h1>Prepare audit-backed financial exports.</h1><ExportPanel /></main>; }
+export default function AdminExportsPage() { return <main className="dashboard-page"><header className="dashboard-heading"><p className="eyebrow">Admin · exports</p><h1>Prepare audit-backed financial exports.</h1><p>Only minimized public-safe rows can be prepared here. This workspace never exposes private notes, Member contact details, payment credentials, or restricted documents.</p></header><ExportPanel /></main>; }

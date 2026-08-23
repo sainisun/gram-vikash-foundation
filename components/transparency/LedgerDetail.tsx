@@ -1,0 +1,14 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useState } from "react";
+
+type Item = { id: number; primary: string; secondary: string; amountPaise: number };
+const inr = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
+
+export function LedgerDetail({ mode, initialItems }: { mode: "donations" | "expenses"; initialItems: Item[] }) {
+  const [items, setItems] = useState(initialItems); const [status, setStatus] = useState("Published records are shown below."); const [refreshing, setRefreshing] = useState(false);
+  const title = mode === "donations" ? "Published donation records" : "Published expense records";
+  const refresh = useCallback(async () => { setRefreshing(true); try { const response = await fetch(`/api/ledger/${mode}`, { cache: "no-store" }); if (!response.ok) throw new Error(); const data = await response.json(); setItems(data.items.map((row: any) => mode === "donations" ? { id: row.id, primary: row.displayName, secondary: `${row.programName} · ${new Date(row.donatedAt).toLocaleDateString()}`, amountPaise: row.amountPaise } : { id: row.id, primary: row.publicDescription, secondary: `${row.category} · ${new Date(row.spentAt).toLocaleDateString()}`, amountPaise: row.amountPaise })); setStatus("Records refreshed from the public ledger."); } catch { setStatus("The refresh is temporarily unavailable. Visible records may be stale; please try again."); } finally { setRefreshing(false); } }, [mode]);
+  return <main className="main"><section className="ledger-toolbar"><div><p className="eyebrow">Public ledger · {mode}</p><h1>{title}</h1><p>Records are displayed in a public-safe form. Private notes, receipts, contact data, and restricted documents are not available here.</p></div><button type="button" onClick={() => void refresh()} disabled={refreshing}>{refreshing ? "Refreshing…" : "Refresh records"}</button></section><p className="ledger-status" aria-live="polite">{status}</p><section className="detail-ledger"><div className="detail-ledger-head"><span className="stamp">{items.length} PUBLISHED</span><Link href="/ledger">← All public records</Link></div>{items.length ? <div className="record-list">{items.map(item => <div key={item.id}><div><strong>{item.primary}</strong><span>{item.secondary}</span></div><b>{inr(item.amountPaise)}</b></div>)}</div> : <div className="record-empty"><span className="stamp">NO PUBLISHED ENTRIES</span><h2>There are no published {mode} yet.</h2><p>{mode === "donations" ? "Successful entries will appear after a registered Member’s record is completed and safe public projection is available." : "Approved expense entries will appear after protected administrator entry and public-safe publication."}</p></div>}</section></main>;
+}

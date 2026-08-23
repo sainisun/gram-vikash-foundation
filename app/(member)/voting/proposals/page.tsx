@@ -1,6 +1,4 @@
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
 import { requireMember } from "@/lib/auth/session";
 
-export default async function VotingProposalsPage() {
-  await requireMember();
-  return <main className="main"><p className="eyebrow">Member · proposals</p><h1>Community proposals are not active.</h1><section className="gate">Proposal submission and upvoting remain feature-gated with the community and moderation controls.</section></main>;
-}
+export default async function VotingProposalsPage() { await requireMember(); return <ApprovalGate eyebrow="Member · proposals" title="Proposal activity is not open yet." summary="The platform will not collect proposals or upvotes until moderation, rate limits, the trending rule, and the official-issue governance process are approved." requirements={["Approved proposal and trending rule", "Moderated rate-limited proposal workflow", "Community pilot evidence", "Founder and architect voting-governance sign-off"]} primaryHref="/voting" primaryLabel="View voting readiness" />; }

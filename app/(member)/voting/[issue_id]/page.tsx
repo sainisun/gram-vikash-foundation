@@ -1,6 +1,4 @@
-export default async function VotingIssuePage({ params }: { params: Promise<{ issue_id: string }> }) {
-  const { requireMember } = await import("@/lib/auth/session");
-  await requireMember();
-  const { issue_id } = await params;
-  return <main className="main"><p className="eyebrow">Member · voting issue {issue_id}</p><h1>Voting is not active.</h1><section className="gate">Votes require an approved verification workflow, verified-voter server check, immutable ballot integrity controls, and governance approval.</section></main>;
-}
+import { ApprovalGate } from "@/components/gates/ApprovalGate";
+import { requireMember } from "@/lib/auth/session";
+
+export default async function VotingIssuePage({ params }: { params: Promise<{ issue_id: string }> }) { await requireMember(); const { issue_id } = await params; return <ApprovalGate eyebrow={`Member · issue ${issue_id}`} title="This voting issue is not active." summary="No ballot can be shown or cast until the community pilot, Verified Voter workflow, official-issue lifecycle, and ballot-secrecy controls are approved." requirements={["Verified Voter policy and reviewer workflow", "Published issue-creation and option-locking rule", "One-member-one-vote concurrency tests", "Aggregate-only result and anomaly procedure"]} primaryHref="/voting" primaryLabel="View voting readiness" />; }

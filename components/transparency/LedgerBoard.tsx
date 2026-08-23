@@ -1,0 +1,17 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useState } from "react";
+
+type Donation = { id: number; displayName: string; programName: string; amountPaise: number; donatedAt: string };
+type Expense = { id: number; publicDescription: string; category: string; amountPaise: number; spentAt: string };
+const inr = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
+
+export function LedgerBoard({ initialDonations, initialExpenses }: { initialDonations: Donation[]; initialExpenses: Expense[] }) {
+  const [donations, setDonations] = useState(initialDonations);
+  const [expenses, setExpenses] = useState(initialExpenses);
+  const [status, setStatus] = useState("Published ledger records are shown below.");
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = useCallback(async () => { setRefreshing(true); try { const [donationResponse, expenseResponse] = await Promise.all([fetch("/api/ledger/donations", { cache: "no-store" }), fetch("/api/ledger/expenses", { cache: "no-store" })]); if (!donationResponse.ok || !expenseResponse.ok) throw new Error("ledger unavailable"); const [donationData, expenseData] = await Promise.all([donationResponse.json(), expenseResponse.json()]); setDonations(donationData.items); setExpenses(expenseData.items); setStatus("Ledger refreshed from the published public-record view."); } catch { setStatus("The ledger refresh is temporarily unavailable. The visible records may be stale; please try again."); } finally { setRefreshing(false); } }, []);
+  return <><section className="ledger-toolbar"><div><p className="eyebrow">Public ledger</p><h1>Donation and expense records.</h1><p>These public projections remove private contact details and respect each Member’s display preference.</p></div><button type="button" onClick={() => void refresh()} disabled={refreshing}>{refreshing ? "Refreshing…" : "Refresh ledger"}</button></section><p className="ledger-status" aria-live="polite">{status}</p><section className="ledger-columns"><article className="ledger-panel"><div className="ledger-panel-heading"><div><p className="eyebrow">Incoming</p><h2>Donations</h2></div><Link href="/ledger/donations">Full view →</Link></div>{donations.length ? <div className="record-list">{donations.map(row => <div key={row.id}><div><strong>{row.displayName}</strong><span>{row.programName} · {new Date(row.donatedAt).toLocaleDateString()}</span></div><b>{inr(row.amountPaise)}</b></div>)}</div> : <div className="record-empty"><span className="stamp">NO PUBLISHED ENTRIES</span><p>Successful donation records will appear here after a registered Member’s transaction is recorded and the public projection is safe to publish.</p></div>}</article><article className="ledger-panel"><div className="ledger-panel-heading"><div><p className="eyebrow">Outgoing</p><h2>Expenses</h2></div><Link href="/ledger/expenses">Full view →</Link></div>{expenses.length ? <div className="record-list">{expenses.map(row => <div key={row.id}><div><strong>{row.publicDescription}</strong><span>{row.category} · {new Date(row.spentAt).toLocaleDateString()}</span></div><b>{inr(row.amountPaise)}</b></div>)}</div> : <div className="record-empty"><span className="stamp">NO PUBLISHED ENTRIES</span><p>Approved expense records will appear here after administrator entry and the public-safe ledger projection update.</p></div>}</article></section></>;
+}
