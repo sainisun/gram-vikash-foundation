@@ -30,6 +30,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/deployment-runbook.md`](docs/deployment-runbook.md) | Vercel/managed-Postgres deployment, environment variables, Razorpay setup, monitoring, rollback, and recovery |
 | [`docs/runtime-configuration.md`](docs/runtime-configuration.md) | Managed configuration names, secret boundaries, approval ownership, and fail-closed feature-gate rules |
 | [`docs/phase-b-activation-checklist.md`](docs/phase-b-activation-checklist.md) | Evidence and human sign-off required before enabling community capability |
+| [`docs/approved-program-content.md`](docs/approved-program-content.md) | Version-controlled source copy for the published Coaching, Library, and Kanyadan program records |
 
 ## Recommended implementation order
 
