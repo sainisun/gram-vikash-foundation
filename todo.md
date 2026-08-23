@@ -41,6 +41,6 @@
 - [x] Audit current implementation mismatches against the PRD, API contracts, authoritative folder structure, and guarded-feature policy.
 - [x] Fix verified structural, authorization, route-contract, and user-flow mismatches without enabling gated capabilities.
 - [x] Add regression coverage for corrected authorization and route-contract behavior.
-- [x] Validate and push the mismatch remediation to GitHub.
+- [x] Push the mismatch remediation to GitHub after repository credentials are reconnected.
 - [x] Reconcile the Next.js Member registration/login entrypoint with the managed-auth session bridge and remove stale migration-only access messaging.
 - [x] Stabilize standalone TypeScript checks against Next.js generated-cache churn.
