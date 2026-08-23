@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mysql2"],
+  // Allow local validation and managed preview hosts in development; production origins are not widened.
+  allowedDevOrigins: ["127.0.0.1", "localhost", "**.manus.computer"],
   async headers() {
     return [{ source: "/(.*)", headers: [
       { key: "X-Content-Type-Options", value: "nosniff" },

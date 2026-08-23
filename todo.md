@@ -86,3 +86,5 @@
 - [x] Publish the approved PRD-defined Free Coaching, Community Library, and Kanyadan Assistance program records without unverified impact data.
 - [x] Assess the remaining safe Phase A readiness gaps and select the highest-priority improvement without enabling gated features.
 - [x] Align the repository status and workspace-reconciliation guidance with the implemented Next.js App Router Phase A runtime and retained approval gates.
+- [x] Identify the next safe Phase A operational-readiness improvement without enabling gated features.
+- [x] Configure approved local development origins to prevent the observed Next.js cross-origin warning during preview validation.
