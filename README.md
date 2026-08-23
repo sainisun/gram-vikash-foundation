@@ -1,8 +1,8 @@
 # Gram Vikash Foundation
 
-Gram Vikash Foundation is a village-run charitable organization supporting free coaching for disadvantaged children, a community library, and kanyadan assistance for poor families’ daughters. This repository contains the product requirements and engineering documentation for a mobile-first donation and impact platform whose defining feature is transparent, traceable financial reporting. Every donation requires a registered unified Member account; public anonymity controls only whether that Member’s name appears on the donor wall. The public dashboard and ledgers must derive their numbers from source donation and expense records rather than hardcoded or manually maintained totals. [1]
+Gram Vikash Foundation is a village-run charitable organization supporting free coaching for disadvantaged children, a community library, and Kanyadan assistance for eligible poor families. This repository contains the Phase A Next.js application and its supporting product, engineering, and operational documentation. Every donation requires a registered unified Member account; public anonymity controls only whether that Member’s name appears on the donor wall. The public dashboard and ledgers derive their numbers from source donation and expense records rather than hardcoded or manually maintained totals. [1]
 
-> **Current status:** Requirements and implementation documentation are ready. Application code, infrastructure provisioning, and live payment enablement remain future implementation work and require the human review gates described below.
+> **Current status:** The Phase A application is implemented on Next.js App Router with public transparency views, unified Member journeys, protected administration, audit evidence, and three approved public program records. Live payments, community activity, voter-document review, and voting remain disabled until their documented human approval gates are complete.
 
 ## Start here for a new AI coding agent
 
@@ -32,23 +32,22 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/phase-b-activation-checklist.md`](docs/phase-b-activation-checklist.md) | Evidence and human sign-off required before enabling community capability |
 | [`docs/approved-program-content.md`](docs/approved-program-content.md) | Version-controlled source copy for the published Coaching, Library, and Kanyadan program records |
 
-## Recommended implementation order
+## Current implementation boundary
 
-Build the Donation & Transparency Platform first using the active workspace baseline in [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md): unified Member profile completion through managed authentication, database and audit foundation, offline donation/expense entry, public ledgers and summary, gated payment readiness, then mobile/low-bandwidth QA and soft launch. Keep community posting/chat disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Add voting only after the community pilot proves that document-based voter verification and moderation operate reliably. [1]
+The implemented Phase A boundary comprises managed-auth Member registration and profiles; the database and audit foundation; approved program publication; public ledgers and summary; protected offline donation, expense, program, export, and readiness operations; and payment-readiness screens that fail closed. Community posting/chat must remain disabled until moderation staffing, privacy notices, safeguarding escalation, and the Grievance Officer process are approved. Voting must remain disabled until the community pilot proves that document-based voter verification and moderation operate reliably. [1]
 
 ## Local development setup
 
-The repository contains the planning documentation. The initialized application workspace uses React, Express, tRPC, Drizzle, MySQL/TiDB, and managed OAuth; see the reconciliation guide before starting implementation. The intended local setup is:
+The repository contains the active Next.js App Router workspace. It uses React, TypeScript, Tailwind-style global CSS, Drizzle, MySQL/TiDB, managed OAuth, and server-side route handlers; see the reconciliation guide before changing implementation boundaries. The intended local setup is:
 
 ```bash
 git clone https://github.com/sainisun/gram-vikash-foundation.git
 cd gram-vikash-foundation
 pnpm install
-cp .env.example .env.local
 pnpm dev
 ```
 
-Use synthetic data locally. Never copy production donor, kanyadan, community-member, report, receipt, or payment data into a developer environment. The first implementation should add commands for migrations, seed fixtures, linting, formatting, type checking, unit tests, integration tests, and end-to-end tests. It should also add Member registration/login, public-display consent, restricted voter-document upload/review, and the corresponding test fixtures before any payment or voting launch. Keep payment credentials in the provider/secret manager and use Razorpay test mode during development.
+Use no production donor, Kanyadan, community-member, report, receipt, or payment data in a local environment. The repository provides type-checking, unit testing, and production-build commands. Managed runtime configuration is supplied through the platform, not through committed environment files. Keep payment credentials in the provider’s secure configuration and use Razorpay test mode only after the payment gate receives the required human approval.
 
 ## Human review gates
 

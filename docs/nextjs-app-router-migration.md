@@ -1,6 +1,6 @@
 # Next.js App Router Migration Boundary
 
-**Decision:** The application will migrate from the active React/Vite + Express/tRPC presentation shell to a **Next.js App Router** application. The target route groups are `app/(public)`, `app/(donor)`, `app/(community)`, `app/(admin)`, and `app/api`.
+**Status:** Migration completed. The application now runs on **Next.js App Router** using the authoritative `app/(public)`, `app/(member)`, `app/(admin)`, and `app/api` structure. There is no separate `(donor)` or `(community)` identity group: all authenticated user journeys share the unified Member model. [1]
 
 ## Preserved invariants
 
@@ -12,17 +12,17 @@
 | Payments | Razorpay remains disabled until merchant credentials, legal/finance review, test-mode evidence, and human approval are complete. |
 | Community and voting | Route groups may exist, but all interactive functionality remains feature-gated pending their documented operational approvals. |
 
-## Migration sequence
+## Completed migration state
 
-1. Install Next.js and introduce the App Router foundation without deleting the legacy source tree.
-2. Move route rendering into the public, donor, community, and admin route groups.
-3. Add Next route handlers which call server-only database and authorization services.
-4. Revalidate public projections, Member ownership, admin authorization, audit evidence, payment gates, and feature flags.
-5. Remove legacy Vite/Express runtime only after the Next production build and preview flows pass.
+1. Next.js App Router is the active runtime for public, Member, administrative, and API routes.
+2. Route rendering uses the public, unified Member, and administrative groups named in the authoritative folder structure.
+3. Next route handlers call server-only database and authorization services.
+4. Public projections, Member ownership, administrative authorization, audit evidence, payment gates, and feature flags have regression coverage and release validation.
+5. Legacy Vite/Express directories may remain for historical or compatibility reasons, but they are not served by the active runtime.
 
 ## Rollback approach
 
-The legacy `client/` and `server/` folders remain intact until the Next.js routes, API boundaries, and production build are verified. Database migrations are **not** rolled back as part of this presentation-layer migration. If the Next runtime fails validation, restore the prior WebDev checkpoint and retain the existing database state.
+Database migrations are **not** rolled back as part of the presentation-layer migration. If a future Next runtime change fails validation, restore the prior WebDev checkpoint and retain the existing database state. Do not revive legacy endpoints as a bypass for Member authorization, audit logging, or server-controlled feature gates.
 
 ## References
 

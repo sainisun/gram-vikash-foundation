@@ -1,6 +1,6 @@
 # Workspace Reconciliation
 
-**Status:** Active implementation baseline  
+**Status:** Active Next.js App Router runtime baseline
 **Applies to:** Phase A implementation workspace  
 **Precedence:** This document overrides framework, database-engine, authentication, deployment, and endpoint-shape assumptions in earlier planning documents where they conflict.
 
@@ -8,25 +8,25 @@
 
 ## 1. Adopted implementation baseline
 
-The initialized workspace is a React 19 and Vite frontend with Tailwind CSS, an Express server, tRPC 11 procedures, Drizzle ORM, and managed MySQL/TiDB. Authentication is supplied through the managed Manus OAuth flow already included in the workspace. This is the implementation baseline for Phase A; the earlier Next.js, PostgreSQL, password, NextAuth/Supabase Auth, Vercel, and REST route-handler examples are not the runtime architecture for this build.
+The active workspace is a Next.js 15 App Router application using React 19, TypeScript, Tailwind-style global CSS, Drizzle ORM, managed MySQL/TiDB, and managed OAuth. Server-side database and authorization services back the `app/api` route handlers. This is the implementation baseline for Phase A; earlier React/Vite, Express/tRPC, PostgreSQL, password, NextAuth/Supabase Auth, Vercel, and custom-auth examples are not the runtime architecture for this build.
 
 | Concern | Earlier planning assumption | Adopted Phase A implementation baseline | Required implementation rule |
 |---|---|---|---|
-| Frontend | Next.js/App Router | React 19, Vite, Wouter, Tailwind CSS | Page components live in `client/src/pages/`; routes are registered in `client/src/App.tsx`. |
-| Backend | Next.js route handlers/REST | Express 4 plus tRPC 11 | Procedures belong in `server/routers.ts` or feature router modules; frontend calls `trpc.*` hooks. |
+| Frontend | React/Vite/Wouter examples | Next.js 15 App Router, React 19, Tailwind-style global CSS | Page components live in the authoritative `app/(public)`, `app/(member)`, and `app/(admin)` groups. |
+| Backend | Express/tRPC examples | Next.js route handlers plus server-only services | Handlers belong in `app/api/**/route.ts`; they call server-only database and authorization helpers. |
 | Database | PostgreSQL | Managed MySQL/TiDB with Drizzle | `drizzle/schema.ts` and applied migrations are authoritative for the runtime schema. |
 | Identity | Password baseline / NextAuth / Supabase Auth | Managed Manus OAuth | Do not implement custom password storage. A future password flow requires an approved identity-provider and security design. |
 | Storage | Supabase/R2 examples | Workspace S3 storage helpers | Store only S3 object references in the database; never store file bytes in database columns. |
 | Hosting | Vercel | Managed WebDev Autoscale hosting | Use the managed server and database; do not rely on an always-on worker in Phase A. |
-| API contract form | REST-like route examples | Typed tRPC procedures | Preserve the authorization, data-projection, validation, status/error semantics as logical contracts, expressed as typed procedures. |
+| API contract form | tRPC examples | JSON-over-HTTP Next route handlers | Preserve the authorization, data-projection, validation, status/error semantics as logical contracts, expressed as route handlers. |
 
 ## 2. Documentation adaptation rules
 
-The PRD remains the product source of truth. The `database-schema.md` PostgreSQL DDL is a relational design reference only; the TypeScript Drizzle schema and migration files are the executable schema. UUID-specific or PostgreSQL-specific examples should be translated to the initialized MySQL/TiDB and Drizzle conventions without weakening unique constraints, foreign keys, indexes, financial amount checks, or the one-vote-per-Member invariant.
+The PRD remains the product source of truth. The `database-schema.md` PostgreSQL DDL is a relational design reference only; the TypeScript Drizzle schema and migration files are the executable schema. UUID-specific or PostgreSQL-specific examples must be translated to the initialized MySQL/TiDB and Drizzle conventions without weakening unique constraints, foreign keys, indexes, financial amount checks, or the one-vote-per-Member invariant.
 
-The REST paths in `api-contracts.md` are domain-contract names. Phase A implements their equivalent tRPC procedures under a domain router. For example, the public financial summary becomes a `publicTransparency.summary` query; admin offline donation entry becomes an authenticated `admin.recordOfflineDonation` mutation; and profile settings become a protected `member.updateProfile` mutation. Procedures must apply Zod validation, derive identity from `ctx.user`, and never accept a browser-supplied financial owner, administrative actor, role, or verification tier.
+The REST paths in `api-contracts.md` are domain-contract names. Phase A implements their route-handler equivalents under `app/api`. For example, the public financial summary is available through `/api/summary`; offline donation entry is restricted to `/api/admin/donations/offline`; and Member profile operations are restricted to `/api/member/profile`. Handlers must validate inputs, derive identity from the managed session, and never accept a browser-supplied financial owner, administrative actor, role, or verification tier.
 
-The prior folder-structure document describes the original Next.js target. For this workspace, use the template’s actual structure: `client/src/pages/` for pages, `client/src/components/` for reusable UI, `client/src/App.tsx` for Wouter routes, `drizzle/schema.ts` for tables, `server/db.ts` for database helpers, `server/routers.ts` for tRPC procedures, `storage/` and `server/storage.ts` for object storage, and `server/*.test.ts` for Vitest coverage.
+The authoritative folder-structure document describes the current Next.js implementation. Use `app/(public)`, `app/(member)`, and `app/(admin)` for pages; `app/api` for route handlers; `components/` for reusable presentation; `lib/auth/` for session and authorization helpers; `drizzle/schema.ts` for tables; `server/db.ts` for database services; and `server/*.test.ts` for Vitest coverage. Legacy directories may remain in the repository for compatibility or history, but they are not the active request runtime.
 
 ## 3. Phase A implementation scope
 

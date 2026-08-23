@@ -84,3 +84,5 @@
 - [x] Identify and complete the next safe Phase A operational-readiness capability without enabling gated features.
 - [x] Add safe public-site metadata, robots, and dynamic sitemap support for public pages and published programs only.
 - [x] Publish the approved PRD-defined Free Coaching, Community Library, and Kanyadan Assistance program records without unverified impact data.
+- [x] Assess the remaining safe Phase A readiness gaps and select the highest-priority improvement without enabling gated features.
+- [x] Align the repository status and workspace-reconciliation guidance with the implemented Next.js App Router Phase A runtime and retained approval gates.
