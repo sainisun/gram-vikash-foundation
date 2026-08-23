@@ -1,0 +1,2 @@
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function NewVotingIssuePage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · new voting issue</p><h1>Voting administration is not active.</h1><section className="gate">No issue, ballot, or result can be created until voter verification, one-vote integrity, governance approval, and privacy controls are operational.</section></main>; }

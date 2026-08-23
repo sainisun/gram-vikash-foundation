@@ -32,3 +32,9 @@
 - [x] Complete the remaining Next.js admin migration: ledger review, controlled export preparation, and receipt-readiness status.
 - [x] Add remaining public and admin Next.js route handlers for program detail, donor-wall data, Member history, financial export preparation, and receipt readiness.
 - [x] Verify and push the completed Next.js migration to GitHub with payment, community, and voting gates still disabled.
+- [x] Replace the repository folder-structure guide with the authoritative unified Member-account architecture and full API contract cross-reference.
+- [x] Reconcile safe current Next.js route aliases and authorization boundaries with the authoritative public, Member, and admin structure.
+- [x] Validate and push the authoritative structure correction to GitHub.
+- [x] Add or verify authoritative public compatibility routes for registration, login, split ledgers, donor wall, and the public donation gateway.
+- [x] Add or verify authoritative administrative compatibility routes for dashboard, new expense, program edit, voter verification, moderation reports, and voting-issue creation.
+- [x] Run a final implemented-route inventory against the authoritative folder-structure guide; retain unimplemented community, voting, payment, and restricted-document APIs as explicitly gated contract boundaries.

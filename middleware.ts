@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/my-donations", "/admin"];
+const protectedPrefixes = ["/donate", "/my-donations", "/profile", "/feed", "/chat", "/voting", "/admin"];
 
 export function middleware(request: NextRequest) {
   const requiresSession = protectedPrefixes.some(prefix => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`));
@@ -14,4 +14,4 @@ export function middleware(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
-export const config = { matcher: ["/my-donations/:path*", "/admin/:path*"] };
+export const config = { matcher: ["/donate/:path*", "/my-donations/:path*", "/profile/:path*", "/feed/:path*", "/chat/:path*", "/voting/:path*", "/admin/:path*"] };

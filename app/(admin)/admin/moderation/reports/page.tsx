@@ -1,0 +1,2 @@
+import { requireManagedAdmin } from "@/lib/auth/session";
+export default async function ModerationReportsPage() { await requireManagedAdmin(); return <main className="main"><p className="eyebrow">Admin · moderation reports</p><h1>Reports are not active.</h1><section className="gate">Report intake will remain disabled with community features until the named moderation owner, grievance process, and safeguarding controls are approved.</section></main>; }
