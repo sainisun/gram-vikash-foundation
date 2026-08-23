@@ -81,7 +81,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .mission-grid article h2 { margin:18px 0 0; }
 .public-footer { display:grid; grid-template-columns:1fr auto; gap:30px; padding:34px max(20px, calc((100vw - 1120px)/2)); border-top:1px solid var(--line); background:#f8f1df; }
 .public-footer p { margin:4px 0 0; font-size:14px; }
-.public-footer > div:last-of-type { display:flex; flex-wrap:wrap; gap:16px; align-items:start; font-size:13px; font-weight:800; }
+.public-footer > div:last-of-type { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; font-size:13px; font-weight:800; }
 .public-footer small { grid-column:1/-1; color:var(--muted); font-size:11px; }
 .workspace { display:grid; grid-template-columns:280px minmax(0,1fr); min-height:calc(100vh - 69px); background:rgba(255,253,246,.65); }
 .workspace-aside { position:sticky; top:69px; align-self:start; height:calc(100vh - 69px); display:flex; flex-direction:column; gap:28px; padding:30px 22px; border-right:1px solid var(--line); background:rgba(248,241,223,.78); }
@@ -105,7 +105,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .member-snapshot-wide { grid-column:1/-1; }
 .dashboard-grid { display:grid; grid-template-columns:1.35fr .65fr; gap:16px; }
 .dashboard-card, .profile-panel { padding:24px; border:1px solid var(--line); border-radius:16px; background:rgba(255,253,246,.9); }
-.card-title { display:flex; align-items:start; justify-content:space-between; gap:16px; }
+.card-title { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
 .card-title h2, .dashboard-card h2, .profile-panel h2 { margin:5px 0 8px; }
 .card-title a { color:var(--ink); font-size:12px; font-weight:800; }
 .history-list { display:grid; gap:0; margin-top:18px; border-top:1px solid var(--line); }
@@ -154,7 +154,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .ledger-status { margin:0 0 18px; padding:10px 12px; border-radius:8px; background:rgba(248,241,223,.72); font-size:13px; }
 .ledger-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 .ledger-panel { min-height:380px; padding:22px; border:1px solid var(--line); border-radius:16px; background:rgba(255,253,246,.9); }
-.ledger-panel-heading { display:flex; align-items:start; justify-content:space-between; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.ledger-panel-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--line); }
 .ledger-panel-heading h2 { margin:5px 0 0; }
 .ledger-panel-heading a { color:var(--ink); font-size:12px; font-weight:800; }
 .record-list { display:grid; }
@@ -164,14 +164,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .record-list b { white-space:nowrap; }
 .record-empty { display:grid; align-content:center; min-height:270px; max-width:420px; }
 .record-empty p { font-size:14px; }
-.ledger-guidance { display:flex; align-items:start; gap:12px; margin-top:16px; padding:16px 18px; border-left:3px solid var(--accent); border-radius:10px; background:#fff6ef; }
+.ledger-guidance { display:flex; align-items:flex-start; gap:12px; margin-top:16px; padding:16px 18px; border-left:3px solid var(--accent); border-radius:10px; background:#fff6ef; }
 .ledger-guidance p { margin:0; font-size:13px; }
 .detail-ledger { min-height:390px; padding:22px; border:1px solid var(--line); border-radius:16px; background:rgba(255,253,246,.9); }
 .detail-ledger-head { display:flex; justify-content:space-between; align-items:center; padding-bottom:14px; border-bottom:1px solid var(--line); }
 .detail-ledger-head a { color:var(--ink); font-size:12px; font-weight:800; }
 .operation-form { display:grid; gap:14px; }
 .operation-form > p { margin:0; font-size:13px; }
-.form-heading { display:flex; align-items:start; justify-content:space-between; gap:16px; }
+.form-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
 .form-heading h2 { margin:4px 0 0; }
 .operation-form button.button { justify-self:start; }
 .operation-form button.button:disabled { cursor:not-allowed; opacity:.62; }

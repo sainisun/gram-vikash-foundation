@@ -88,3 +88,4 @@
 - [x] Align the repository status and workspace-reconciliation guidance with the implemented Next.js App Router Phase A runtime and retained approval gates.
 - [x] Identify the next safe Phase A operational-readiness improvement without enabling gated features.
 - [x] Configure approved local development origins to prevent the observed Next.js cross-origin warning during preview validation.
+- [x] Resolve remaining stylesheet compatibility warnings without altering public, Member, admin, or gated-feature behavior.
