@@ -81,3 +81,5 @@
 - [x] Add protected audit-log filtering and search with query-bound limits, server-side validation, and clear evidence-review states.
 - [x] Validate audit action and entity-type filters against an explicit server-side allowlist and reject invalid values.
 - [x] Add regression coverage for protected audit filtering, bounded limits, and invalid filter rejection.
+- [x] Identify and complete the next safe Phase A operational-readiness capability without enabling gated features.
+- [x] Add safe public-site metadata, robots, and dynamic sitemap support for public pages and published programs only.

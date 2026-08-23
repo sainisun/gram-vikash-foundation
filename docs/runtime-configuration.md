@@ -11,6 +11,7 @@
 | Payment configuration | Hosting provider’s encrypted environment | Keep live credentials absent until the A4 staged-test and human approval gates are complete. |
 | Feature approvals | Database feature-flag records plus documented human sign-off | `payments_live`, community, and voting functionality must fail closed unless both configuration and approval are present. |
 | Public browser configuration | Explicit `VITE_*` values approved for browser use | Never put a credential, webhook secret, database URL, private receipt location, or restricted-document location in a browser-visible variable. |
+| Public canonical URL | `NEXT_PUBLIC_SITE_URL` | Non-secret HTTPS base URL used only for metadata, `robots.txt`, and the public sitemap. Set it to the final domain before publishing. |
 
 ## Active configuration names
 
