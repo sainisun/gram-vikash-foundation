@@ -69,3 +69,9 @@
 - [x] Perform and document keyboard, focus, label, contrast, and zoom validation across public, Member, and admin flows.
 - [x] Verify focus and reduced-motion CSS, the accessibility validation record, and final responsive route checks before closing accessibility validation.
 - [x] Run browser-level keyboard focus-order and 200% reflow checks for representative public, Member, and admin routes.
+- [x] Review remaining safe Phase A readiness gaps and record the required operational evidence.
+- [x] Build a protected admin readiness dashboard that reports gate status, audit evidence, financial-record counts, and required human reviews without exposing secrets.
+- [x] Add public-safe trust guidance that explains current operational boundaries and links to available policy/readiness material.
+- [x] Add explicit server-side admin protection and visible audit-evidence detail to the readiness dashboard.
+- [x] Add verified public trust-page links to the A2, runtime, and Phase B readiness guidance.
+- [ ] Validate and synchronize the readiness tooling to GitHub.

@@ -249,6 +249,18 @@ export async function getAuditLogEntries(limit = 100) {
     .from(auditLogs).orderBy(desc(auditLogs.createdAt), desc(auditLogs.id)).limit(limit);
 }
 
+export async function getOperationalReadinessSnapshot() {
+  const [financial, memberRows, programRows, auditRows, gates] = await Promise.all([
+    getPublicTransparencySnapshot(), getMembersForAdmin(), getProgramsForAdmin(), getAuditLogEntries(100), getFeatureGates(),
+  ]);
+  return { financial, counts: { members: memberRows.length, programs: programRows.length, auditEvents: auditRows.length }, gates, evidence: [
+    { key: "admin_authorization", label: "Admin authorization", status: "review", detail: "Confirm named administrators and denied-access behavior." },
+    { key: "offline_accounting", label: "Offline accounting", status: "review", detail: "Review staging entries, duplicate handling, and derived totals." },
+    { key: "privacy_projection", label: "Privacy projection", status: "review", detail: "Review Member display controls and public-safe export fields." },
+    { key: "phase_b", label: "Phase B operations", status: "hold", detail: "Moderation, grievance, privacy, and safeguarding evidence are still required." },
+  ] };
+}
+
 export async function prepareFinancialExport(input: { actorUserId: number; scope: "donations" | "expenses" | "both" }) {
   const [donationRows, expenseRows] = await Promise.all([
     input.scope === "expenses" ? Promise.resolve([]) : getPublicDonationLedger(100),
