@@ -242,11 +242,21 @@ export async function getFeatureGates() {
   return Object.fromEntries(known.map(key => [key, found.get(key) ?? false]));
 }
 
-export async function getAuditLogEntries(limit = 100) {
+export async function getAuditLogEntries(limit = 100, filters?: { action?: string; entityType?: string; query?: string }) {
   const db = await getDb();
   if (!db) return [];
-  return db.select({ id: auditLogs.id, actorUserId: auditLogs.actorUserId, action: auditLogs.action, entityType: auditLogs.entityType, entityId: auditLogs.entityId, createdAt: auditLogs.createdAt })
-    .from(auditLogs).orderBy(desc(auditLogs.createdAt), desc(auditLogs.id)).limit(limit);
+  const boundedLimit = Math.max(1, Math.min(limit, 200));
+  const rows = await db.select({ id: auditLogs.id, actorUserId: auditLogs.actorUserId, action: auditLogs.action, entityType: auditLogs.entityType, entityId: auditLogs.entityId, createdAt: auditLogs.createdAt })
+    .from(auditLogs).orderBy(desc(auditLogs.createdAt), desc(auditLogs.id)).limit(boundedLimit);
+  const action = filters?.action?.trim().toLowerCase();
+  const entityType = filters?.entityType?.trim().toLowerCase();
+  const query = filters?.query?.trim().toLowerCase();
+  return rows.filter(row => {
+    if (action && row.action.toLowerCase() !== action) return false;
+    if (entityType && row.entityType.toLowerCase() !== entityType) return false;
+    if (query && !`${row.action} ${row.entityType} ${row.entityId} ${row.actorUserId}`.toLowerCase().includes(query)) return false;
+    return true;
+  });
 }
 
 export async function getOperationalReadinessSnapshot() {

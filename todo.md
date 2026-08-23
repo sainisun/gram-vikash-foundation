@@ -77,3 +77,7 @@
 - [x] Validate and synchronize the readiness tooling to GitHub.
 - [x] Inspect the latest shared backlog for incomplete or partially verified Phase A work and complete the highest-priority safe item.
 - [x] Add and verify protected administrative navigation to the existing release-readiness dashboard.
+- [x] Audit the remaining safe production-readiness gaps and complete the highest-priority operational capability without activating gated features.
+- [x] Add protected audit-log filtering and search with query-bound limits, server-side validation, and clear evidence-review states.
+- [x] Validate audit action and entity-type filters against an explicit server-side allowlist and reject invalid values.
+- [x] Add regression coverage for protected audit filtering, bounded limits, and invalid filter rejection.
