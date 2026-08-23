@@ -91,3 +91,5 @@
 - [x] Resolve remaining stylesheet compatibility warnings without altering public, Member, admin, or gated-feature behavior.
 - [x] Assess the next safe Phase A release-readiness safeguard without enabling gated features.
 - [x] Migrate deprecated pnpm package configuration into the supported workspace configuration without changing dependency behavior.
+- [x] Assess the next safe dependency or release-readiness safeguard without enabling gated features.
+- [x] Add a repository-triggered validation workflow that runs the existing type check, regression suite, and production build without changing feature gates.
