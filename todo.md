@@ -74,4 +74,4 @@
 - [x] Add public-safe trust guidance that explains current operational boundaries and links to available policy/readiness material.
 - [x] Add explicit server-side admin protection and visible audit-evidence detail to the readiness dashboard.
 - [x] Add verified public trust-page links to the A2, runtime, and Phase B readiness guidance.
-- [ ] Validate and synchronize the readiness tooling to GitHub.
+- [x] Validate and synchronize the readiness tooling to GitHub.
