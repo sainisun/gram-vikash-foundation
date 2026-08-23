@@ -32,4 +32,7 @@ textarea { min-height: 110px; resize: vertical; }
 input[type="checkbox"] { width: auto; }
 button { cursor: pointer; border: 0; font: inherit; }
 button:not(.button) { border-radius: 6px; padding: 7px 10px; background: #f7e2df; color: #742f2b; font-weight: 700; }
-@media (max-width: 720px) { .navlinks { display: none; } .hero, .grid { grid-template-columns: 1fr !important; } .main { padding: 44px 0; } }
+.refresh-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:18px; padding:0 2px; }
+.refresh-row p { margin:0; font-size:14px; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline:3px solid #d7a629; outline-offset:3px; }
+@media (max-width: 720px) { .navlinks { display: none; } .hero, .grid { grid-template-columns: 1fr !important; } .main { padding: 44px 0; } .refresh-row { align-items:flex-start; flex-direction:column; } }

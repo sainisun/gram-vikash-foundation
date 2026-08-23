@@ -44,3 +44,12 @@
 - [x] Push the mismatch remediation to GitHub after repository credentials are reconnected.
 - [x] Reconcile the Next.js Member registration/login entrypoint with the managed-auth session bridge and remove stale migration-only access messaging.
 - [x] Stabilize standalone TypeScript checks against Next.js generated-cache churn.
+- [ ] Review the current implementation plan gates and record the next safe Phase A readiness tasks.
+- [x] Implement safe operational readiness enhancements that do not activate live payments, community, voter-document review, or voting.
+- [x] Strengthen gated Phase B preparation and keep approval dependencies explicit.
+- [x] Validate and synchronize the next implementation phase to GitHub.
+- [x] Add a visibility-aware 45-second public transparency refresh with manual refresh and clear unavailable state.
+- [x] Add security headers and production environment conventions without requesting or exposing secrets.
+- [x] Document managed production environment conventions, required variable names, and feature-gate ownership without exposing secret values.
+- [x] Update Phase B gate documentation to name required operating evidence before community activation.
+- [x] Diagnose and fix the mobile dashboard runtime error observed after the visibility-aware refresh enhancement.

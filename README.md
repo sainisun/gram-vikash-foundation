@@ -28,6 +28,8 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/content-moderation-playbook.md`](docs/content-moderation-playbook.md) | Day-to-day moderation, reports, removals, grievance handling, templates, and child-safety escalation |
 | [`docs/testing-qa-plan.md`](docs/testing-qa-plan.md) | Unit, integration, webhook, vote, mobile/low-bandwidth, security, and pre-launch testing |
 | [`docs/deployment-runbook.md`](docs/deployment-runbook.md) | Vercel/managed-Postgres deployment, environment variables, Razorpay setup, monitoring, rollback, and recovery |
+| [`docs/runtime-configuration.md`](docs/runtime-configuration.md) | Managed configuration names, secret boundaries, approval ownership, and fail-closed feature-gate rules |
+| [`docs/phase-b-activation-checklist.md`](docs/phase-b-activation-checklist.md) | Evidence and human sign-off required before enabling community capability |
 
 ## Recommended implementation order
 
