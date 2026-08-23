@@ -94,3 +94,11 @@
 - [x] Assess the next safe dependency or release-readiness safeguard without enabling gated features.
 - [x] Add a repository-triggered validation workflow that runs the existing type check, regression suite, and production build without changing feature gates.
 - [x] Update the repository validation actions to supported Node 24 runtimes after observing the GitHub runner deprecation annotation.
+- [x] Assess the next low-risk dependency-maintenance improvement without enabling gated features.
+- [x] Upgrade Next.js to the current audit-recommended patched 15.5.21 release and validate the unchanged public, Member, admin, and gate behavior.
+- [x] Restart the development service after the Next.js update and verify representative public pages.
+- [x] Verify representative protected Member and admin pages remain correctly access-controlled after the Next.js update.
+- [x] Verify the approval-gated payment, community, and voting routes remain fail-closed after the Next.js update.
+- [x] Verify unauthenticated access to representative protected Member routes returns the expected redirect or denial behavior after the Next.js update.
+- [x] Verify non-admin access to representative admin routes returns the expected forbidden or redirect behavior after the Next.js update.
+- [x] Diagnose and resolve the observed development-runtime module error after the Next.js update before release checkpointing.
