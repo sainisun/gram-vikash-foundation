@@ -89,3 +89,5 @@
 - [x] Identify the next safe Phase A operational-readiness improvement without enabling gated features.
 - [x] Configure approved local development origins to prevent the observed Next.js cross-origin warning during preview validation.
 - [x] Resolve remaining stylesheet compatibility warnings without altering public, Member, admin, or gated-feature behavior.
+- [x] Assess the next safe Phase A release-readiness safeguard without enabling gated features.
+- [x] Migrate deprecated pnpm package configuration into the supported workspace configuration without changing dependency behavior.
