@@ -1,1 +1,6 @@
-export default function ChatPage() { return <main className="main"><p className="eyebrow">Group chat</p><h1>Not active yet.</h1><div className="gate">Realtime group chat remains behind the community feature flag and moderation readiness gate.</div></main>; }
+import { requireMember } from "@/lib/auth/session";
+
+export default async function ChatPage() {
+  await requireMember();
+  return <main className="main"><p className="eyebrow">Member · group chat</p><h1>Group chat is not active.</h1><section className="gate">The chat service remains disabled until moderation, safeguarding, retention, and operational ownership are approved.</section></main>;
+}

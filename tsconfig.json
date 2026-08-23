@@ -1,14 +1,14 @@
 {
   "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "components/**/*.ts",
     "components/**/*.tsx",
+    "drizzle/**/*.ts",
     "lib/**/*.ts",
+    "next-env.d.ts",
     "server/**/*.ts",
-    "drizzle/**/*.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

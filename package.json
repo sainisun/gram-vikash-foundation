@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development next dev",
     "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit --project tsconfig.check.json",
     "format": "prettier --write .",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"

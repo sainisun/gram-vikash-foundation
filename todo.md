@@ -38,3 +38,9 @@
 - [x] Add or verify authoritative public compatibility routes for registration, login, split ledgers, donor wall, and the public donation gateway.
 - [x] Add or verify authoritative administrative compatibility routes for dashboard, new expense, program edit, voter verification, moderation reports, and voting-issue creation.
 - [x] Run a final implemented-route inventory against the authoritative folder-structure guide; retain unimplemented community, voting, payment, and restricted-document APIs as explicitly gated contract boundaries.
+- [x] Audit current implementation mismatches against the PRD, API contracts, authoritative folder structure, and guarded-feature policy.
+- [x] Fix verified structural, authorization, route-contract, and user-flow mismatches without enabling gated capabilities.
+- [x] Add regression coverage for corrected authorization and route-contract behavior.
+- [x] Validate and push the mismatch remediation to GitHub.
+- [x] Reconcile the Next.js Member registration/login entrypoint with the managed-auth session bridge and remove stale migration-only access messaging.
+- [x] Stabilize standalone TypeScript checks against Next.js generated-cache churn.
