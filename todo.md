@@ -102,3 +102,8 @@
 - [x] Verify unauthenticated access to representative protected Member routes returns the expected redirect or denial behavior after the Next.js update.
 - [x] Verify non-admin access to representative admin routes returns the expected forbidden or redirect behavior after the Next.js update.
 - [x] Diagnose and resolve the observed development-runtime module error after the Next.js update before release checkpointing.
+- [x] Assess and prepare secure Vercel deployment configuration for separate public website, admin-panel, and backend service URLs.
+- [x] Route public and admin API requests through the dedicated backend service and tighten service boundaries before marking the three Vercel surfaces isolated.
+- [x] Add Vercel project configuration and deployment documentation for three Git-linked services without committing secrets.
+- [ ] Create Git-linked Vercel projects for the public website, admin panel, and backend using the approved three-service architecture.
+- [ ] Configure and verify the required production environment values, distinct URLs, and cross-service boundaries before production release.

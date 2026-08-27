@@ -3,6 +3,7 @@ import { parse as parseCookie } from "cookie";
 import { COOKIE_NAME, decodeOAuthState, ONE_YEAR_MS, OAUTH_STATE_COOKIE } from "@shared/const";
 import { upsertUser } from "@/server/db";
 import { sdk } from "@/server/_core/sdk";
+import { getPostLoginPath } from "@/lib/deployment/surface";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     if (!userInfo.openId) return NextResponse.json({ error: "openid_missing" }, { status: 400 });
     await upsertUser({ openId: userInfo.openId, name: userInfo.name || null, email: userInfo.email ?? null, loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null, lastSignedIn: new Date() });
     const sessionToken = await sdk.createSessionToken(userInfo.openId, { name: userInfo.name || "", expiresInMs: ONE_YEAR_MS });
-    const response = NextResponse.redirect(new URL("/my-donations", request.url));
+    const response = NextResponse.redirect(new URL(getPostLoginPath(), request.url));
     response.cookies.set(COOKIE_NAME, sessionToken, { httpOnly: true, path: "/", maxAge: ONE_YEAR_MS / 1000, sameSite: "none", secure: request.nextUrl.protocol === "https:" });
     response.cookies.set(OAUTH_STATE_COOKIE, "", { httpOnly: true, path: "/", maxAge: 0, sameSite: "none", secure: request.nextUrl.protocol === "https:" });
     return response;
