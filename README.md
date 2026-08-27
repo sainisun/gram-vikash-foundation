@@ -20,7 +20,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/database-schema.md`](docs/database-schema.md) | PostgreSQL DDL, constraints, indexes, foreign-key behavior, and data-sensitivity annotations |
 | [`docs/api-contracts.md`](docs/api-contracts.md) | JSON API methods, paths, authorization, request/response shapes, errors, and rate limits |
 | [`docs/folder-structure.md`](docs/folder-structure.md) | Original file-level Next.js target structure, route groups, access rules, auth helpers, naming, and feature placement guide |
-| [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) | Active React, Express, tRPC, MySQL, and managed-auth implementation baseline with production gates |
+| [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) | Active Next.js App Router, managed-auth, and production-gate implementation baseline |
 | [`docs/nextjs-app-router-migration.md`](docs/nextjs-app-router-migration.md) | Approved migration boundary, preserved safeguards, sequence, and rollback approach for the Next.js App Router transition |
 | [`docs/implementation-plan.md`](docs/implementation-plan.md) | Sequenced Phase A/B/C task plan with dependencies, definitions of done, and human checkpoints |
 | [`docs/a2-human-review-checklist.md`](docs/a2-human-review-checklist.md) | Evidence and sign-off record required before payment activation or any Phase B work |
@@ -29,6 +29,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/testing-qa-plan.md`](docs/testing-qa-plan.md) | Unit, integration, webhook, vote, mobile/low-bandwidth, security, and pre-launch testing |
 | [`docs/deployment-runbook.md`](docs/deployment-runbook.md) | Vercel/managed-Postgres deployment, environment variables, Razorpay setup, monitoring, rollback, and recovery |
 | [`docs/vercel-three-service-deployment.md`](docs/vercel-three-service-deployment.md) | Approved public/admin/API Vercel split, host-aware boundaries, required secure environment values, validation, and rollback |
+| [`docs/supabase-migration-planning.md`](docs/supabase-migration-planning.md) | Dedicated Supabase organization/project decision, PostgreSQL migration record, approved record scope, and RLS posture |
 | [`docs/runtime-configuration.md`](docs/runtime-configuration.md) | Managed configuration names, secret boundaries, approval ownership, and fail-closed feature-gate rules |
 | [`docs/phase-b-activation-checklist.md`](docs/phase-b-activation-checklist.md) | Evidence and human sign-off required before enabling community capability |
 | [`docs/approved-program-content.md`](docs/approved-program-content.md) | Version-controlled source copy for the published Coaching, Library, and Kanyadan program records |
@@ -39,7 +40,7 @@ The implemented Phase A boundary comprises managed-auth Member registration and 
 
 ## Local development setup
 
-The repository contains the active Next.js App Router workspace. It uses React, TypeScript, Tailwind-style global CSS, Drizzle, MySQL/TiDB, managed OAuth, and server-side route handlers; see the reconciliation guide before changing implementation boundaries. The intended local setup is:
+The repository contains the active Next.js App Router workspace. It uses React, TypeScript, Tailwind-style global CSS, Drizzle with PostgreSQL, Supabase as the production database target, managed OAuth, and server-side route handlers; see the reconciliation guide before changing implementation boundaries. The intended local setup is:
 
 ```bash
 git clone https://github.com/sainisun/gram-vikash-foundation.git

@@ -107,3 +107,9 @@
 - [x] Add Vercel project configuration and deployment documentation for three Git-linked services without committing secrets.
 - [ ] Create Git-linked Vercel projects for the public website, admin panel, and backend using the approved three-service architecture.
 - [ ] Configure and verify the required production environment values, distinct URLs, and cross-service boundaries before production release.
+- [x] Convert the Phase A Drizzle schema, connection layer, and migrations from MySQL/TiDB to Supabase PostgreSQL without weakening authorization or feature gates.
+- [x] Provision the Supabase PostgreSQL schema and migrate only authorized existing Phase A records with verification evidence.
+- [ ] Update the Vercel deployment guidance and production configuration for the Supabase PostgreSQL connection without committing secrets.
+- [x] Create a dedicated Supabase organization and isolated Gram Vikash Foundation PostgreSQL project before any schema or data migration.
+- [x] Obtain approval for and apply a Supabase Row Level Security posture before migrating any approved Phase A records.
+- [x] Make the PostgreSQL data layer fail closed for non-PostgreSQL database URLs so local legacy configuration cannot trigger connection attempts after migration.

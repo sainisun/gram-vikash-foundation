@@ -4,7 +4,7 @@
 
 This runbook deploys the same audited Next.js repository into three Git-linked Vercel projects with distinct, host-aware service boundaries. The split gives the public website, the protected administrative workspace, and the API service their own Vercel URLs while preserving the existing Phase A security gates.
 
-> This is a **service-surface separation**. The current Phase A application contains server-rendered pages that directly call the MySQL/TiDB data helpers. Until a later, separately reviewed BFF extraction is completed, the public and admin projects still require the database connection at server runtime. No database value is exposed to the browser.
+> This is a **service-surface separation**. The current Phase A application contains server-rendered pages that directly call the Supabase PostgreSQL data helpers. Until a later, separately reviewed BFF extraction is completed, the public and admin projects still require the private database connection at server runtime. No database value is exposed to the browser.
 
 | Vercel project | Required `GVF_DEPLOYMENT_SURFACE` | Intended surface | Suggested initial URL |
 |---|---|---|---|
@@ -18,6 +18,20 @@ The middleware reads `GVF_DEPLOYMENT_SURFACE` on each request. A missing or inva
 
 The root [`vercel.json`](../vercel.json) keeps Git deployments deterministic by requiring a frozen pnpm lockfile and the existing production build command. Vercel links every project to `sainisun/gram-vikash-foundation`, uses the repository root as its root directory, and deploys from `main`. Vercel's Git-linked project model supports distinct projects from the same repository; each project owns its own environment values and deployment URL. [1]
 
+## Project records
+
+| Service | Vercel project | Project ID | Initial Vercel URL | Status |
+|---|---|---|---|---|
+| Public website | `gvf-public` | `prj_2a53Hql5512nknQsbmCqTGx366Ha` | `https://gvf-public.vercel.app` | Git-linked to `main`; no production deployment created yet. |
+| Admin panel | `gvf-admin` | Pending | Pending | Must be created with a distinct project configuration/root from the public service. |
+| Backend API | `gvf-api` | Pending | Pending | Must be created with a distinct project configuration/root from the public service. |
+
+The configured Vercel integration did not create a second same-root Git project: the `gvf-admin` creation request reused `gvf-public`. Do not treat that reused response as an admin project. Complete the two remaining projects through the authenticated Vercel dashboard with their own root-directory configuration, then enter their generated URLs in the environment values below.
+
+The authenticated Vercel dashboard was checked after project creation. It shows `gvf-public` at `https://gvf-public.vercel.app` with **No Production Deployment**; no configuration values or deployment have been created on that project yet. The subsequent browser import view did not persist, so no administrator or API project creation was confirmed from that attempt.
+
+The authenticated direct repository import path is `https://vercel.com/new/import?hasTrialAvailable=1&id=1342992699&import-source=import-suggestions&name=gram-vikash-foundation&owner=sainisun&provider=github&s=https%3A%2F%2Fgithub.com%2Fsainisun%2Fgram-vikash-foundation`. It should be used rather than a template card if the import list’s dynamic element ordering makes the repository action ambiguous.
+
 The public and admin projects are intentionally separated at the route boundary. The public project returns `404` for `/admin` and `/api/admin/*`. The admin project returns `404` for public and Member pages, while allowing `/admin`, `/api/admin/*`, `/access-required`, and only the authentication endpoints it needs. The API project returns `404` for every non-`/api` path. On the public and admin hosts, non-authentication `/api/*` traffic is internally rewritten to the configured API service URL; direct API handlers do not run on either frontend host. If the backend origin is absent or malformed, frontend API traffic returns `503` rather than falling back to a local handler.
 
 After administrator login on the admin host, the OAuth callback returns the user to `/admin`; the public host retains the normal Member return path at `/my-donations`. Cookie settings and server-side role checks remain unchanged.
@@ -29,7 +43,7 @@ Set the following in **each Vercel project** for both `Production` and `Preview`
 | Variable | `gvf-public` | `gvf-admin` | `gvf-api` | Notes |
 |---|---:|---:|---:|---|
 | `GVF_DEPLOYMENT_SURFACE` | `public` | `admin` | `api` | Non-secret route boundary selector. |
-| `DATABASE_URL` | Required | Required | Required | Use the production MySQL/TiDB URL reachable from Vercel, with TLS options required by the provider. |
+| `DATABASE_URL` | Required | Required | Required | Use Supabase’s private PostgreSQL pooled connection URI, including the provider’s required TLS setting. Do not use a browser/anon key as a database URL. |
 | `JWT_SECRET` | Required | Required | Required | Use one strong, shared production value so server-side session validation remains consistent. |
 | `OAUTH_SERVER_URL` | Required | Required | Required | Must be the production OAuth service base URL. |
 | `VITE_APP_ID` | Required | Required | Required | The managed OAuth application identifier. |
@@ -48,6 +62,14 @@ The current production deployment must retain all existing feature-gate values a
 3. Confirm the three generated `vercel.app` URLs. Do not point a custom domain or DNS record at them until production-route, login, and gate checks have passed.
 4. Validate the public URL’s homepage, published program pages, and ledger; validate the admin URL’s sign-in recovery and admin guard; validate the API URL’s public API responses and that a page route returns `404`. Confirm requests to `https://gvf-public.vercel.app/api/summary` and `https://gvf-admin.vercel.app/api/admin/readiness` are served through the configured backend, not from local frontend handlers.
 5. Keep Vercel Authentication disabled only for the public project. The application’s own Member/admin authorization remains required. If Vercel deployment protection is added to the admin project, record the named owner and recovery process in the A2 evidence pack.
+
+## Current database target
+
+The dedicated Supabase PostgreSQL project is `bnntnowpookwwvggpkkv` in the Mumbai region. Its schema, Row Level Security posture, and approved Phase A records have been migrated. Obtain the corresponding pooled PostgreSQL connection URI from Supabase’s **Connect** panel and add it only through Vercel’s encrypted environment-variable UI.
+
+## Browser setup note
+
+The authenticated Vercel import screen can reset during dynamic navigation. When that occurs, reopen `https://vercel.com/new`, select **Import** next to `sainisun/gram-vikash-foundation`, and continue from the project configuration form. Do not deploy a frontend surface until its required non-secret boundary values and secure runtime values are configured.
 
 ## Rollback
 

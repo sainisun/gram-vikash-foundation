@@ -1,13 +1,27 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { ENV } from "./_core/env";
 import { auditLogs, donations, expenses, featureFlags, members, programs, users } from "../drizzle/schema";
 
+let pool: Pool | null = null;
 let database: ReturnType<typeof drizzle> | null = null;
 
+export function isPostgresDatabaseUrl(value = process.env.DATABASE_URL) {
+  if (!value) return false;
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "postgres:" || protocol === "postgresql:";
+  } catch {
+    return false;
+  }
+}
+
 export async function getDb() {
-  if (!database && process.env.DATABASE_URL) {
-    database = drizzle(process.env.DATABASE_URL);
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!database && isPostgresDatabaseUrl(databaseUrl)) {
+    pool = new Pool({ connectionString: databaseUrl });
+    database = drizzle(pool);
   }
   return database;
 }
@@ -17,9 +31,7 @@ export async function upsertUser(user: typeof users.$inferInsert): Promise<void>
   const db = await getDb();
   if (!db) return;
 
-  const updateSet: Record<string, unknown> = {
-    lastSignedIn: new Date(),
-  };
+  const updateSet: Partial<typeof users.$inferInsert> = { lastSignedIn: new Date(), updatedAt: new Date() };
   if (user.name !== undefined) updateSet.name = user.name;
   if (user.email !== undefined) updateSet.email = user.email;
   if (user.loginMethod !== undefined) updateSet.loginMethod = user.loginMethod;
@@ -29,7 +41,7 @@ export async function upsertUser(user: typeof users.$inferInsert): Promise<void>
     ...user,
     role: user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user"),
     lastSignedIn: new Date(),
-  }).onDuplicateKeyUpdate({ set: updateSet });
+  }).onConflictDoUpdate({ target: users.openId, set: updateSet });
 }
 
 export async function getUserByOpenId(openId: string) {
@@ -82,12 +94,11 @@ export async function saveMemberProfile(input: {
     isAnonymous: input.isAnonymous,
   };
   if (existing) {
-    await db.update(members).set(values).where(eq(members.id, existing.id));
-    return { ...existing, ...values };
+    await db.update(members).set({ ...values, updatedAt: new Date() }).where(eq(members.id, existing.id));
+    return { ...existing, ...values, updatedAt: new Date() };
   }
-  const result = await db.insert(members).values({ userId: input.userId, ...values });
-  const inserted = await getMemberByUserId(input.userId);
-  if (!inserted) throw new Error(`Member profile was not created (${result[0].insertId})`);
+  const [inserted] = await db.insert(members).values({ userId: input.userId, ...values }).returning();
+  if (!inserted) throw new Error("Member profile was not created");
   return inserted;
 }
 
@@ -137,12 +148,13 @@ export async function saveProgram(input: { actorUserId: number; id?: number; slu
   if (!db) throw new Error("Database is unavailable");
   const values = { slug: input.slug, name: input.name, shortDescription: input.shortDescription, description: input.description, targetMetric: input.targetMetric ?? null, currentMetricValue: input.currentMetricValue, isActive: input.isActive };
   if (input.id) {
-    await db.update(programs).set(values).where(eq(programs.id, input.id));
+    await db.update(programs).set({ ...values, updatedAt: new Date() }).where(eq(programs.id, input.id));
     await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.updated", entityType: "program", entityId: String(input.id), metadata: { slug: input.slug, isActive: input.isActive } });
     return input.id;
   }
-  const result = await db.insert(programs).values(values);
-  const id = Number(result[0].insertId);
+  const [created] = await db.insert(programs).values(values).returning({ id: programs.id });
+  if (!created) throw new Error("Program was not created");
+  const id = created.id;
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.created", entityType: "program", entityId: String(id), metadata: { slug: input.slug, isActive: input.isActive } });
   return id;
 }
@@ -150,7 +162,7 @@ export async function saveProgram(input: { actorUserId: number; id?: number; slu
 export async function retireProgram(input: { actorUserId: number; id: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable");
-  await db.update(programs).set({ isActive: false }).where(eq(programs.id, input.id));
+  await db.update(programs).set({ isActive: false, updatedAt: new Date() }).where(eq(programs.id, input.id));
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "program.retired", entityType: "program", entityId: String(input.id), metadata: { isActive: false } });
 }
 
@@ -301,7 +313,7 @@ export async function recordOfflineDonation(input: {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable");
   return db.transaction(async tx => {
-    const result = await tx.insert(donations).values({
+    const [created] = await tx.insert(donations).values({
       memberId: input.memberId,
       programId: input.programId ?? null,
       amountPaise: input.amountPaise,
@@ -313,8 +325,9 @@ export async function recordOfflineDonation(input: {
       receivedAt: input.receivedAt,
       succeededAt: input.receivedAt,
       idempotencyKey: input.idempotencyKey,
-    });
-    const donationId = String(result[0].insertId);
+    }).returning({ id: donations.id });
+    if (!created) throw new Error("Offline donation was not recorded");
+    const donationId = String(created.id);
     await tx.insert(auditLogs).values({
       actorUserId: input.actorUserId,
       action: "offline_donation.recorded",
@@ -338,7 +351,7 @@ export async function recordExpense(input: {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable");
   return db.transaction(async tx => {
-    const result = await tx.insert(expenses).values({
+    const [created] = await tx.insert(expenses).values({
       programId: input.programId ?? null,
       amountPaise: input.amountPaise,
       category: input.category,
@@ -346,8 +359,9 @@ export async function recordExpense(input: {
       privateNotes: input.privateNotes ?? null,
       enteredByUserId: input.actorUserId,
       spentAt: input.spentAt,
-    });
-    const expenseId = String(result[0].insertId);
+    }).returning({ id: expenses.id });
+    if (!created) throw new Error("Expense was not recorded");
+    const expenseId = String(created.id);
     await tx.insert(auditLogs).values({
       actorUserId: input.actorUserId,
       action: "expense.recorded",
