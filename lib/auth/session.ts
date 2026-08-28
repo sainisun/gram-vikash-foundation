@@ -1,12 +1,20 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { sdk } from "@/server/_core/sdk";
-import { getMemberByUserId } from "@/server/db";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getMemberByUserId, getUserByOpenId, upsertUser } from "@/server/db";
 
 export async function getManagedUser() {
-  const incoming = await headers();
   try {
-    return await sdk.authenticateRequest({ headers: { cookie: incoming.get("cookie") ?? "", authorization: incoming.get("authorization") ?? "" } } as never);
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return null;
+    await upsertUser({
+      openId: data.user.id,
+      name: data.user.user_metadata?.full_name ?? data.user.email ?? null,
+      email: data.user.email ?? null,
+      loginMethod: "supabase_magic_link",
+      lastSignedIn: new Date(),
+    });
+    return await getUserByOpenId(data.user.id) ?? null;
   } catch {
     return null;
   }
@@ -41,3 +49,4 @@ export async function requireVerifiedVoter() {
 
 /** Contract-compatible name for the role-checked administrative guard. */
 export const requireAdmin = requireManagedAdmin;
+

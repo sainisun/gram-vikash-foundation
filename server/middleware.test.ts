@@ -11,9 +11,15 @@ describe("Next route middleware", () => {
     expect(response.headers.get("location")).toContain("/access-required");
   });
 
-  it("allows a request carrying the managed session cookie to reach protected routes", () => {
-    const response = middleware(new NextRequest("https://foundation.test/feed", { headers: { cookie: "app_session_id=test-session" } }));
+  it("allows a request carrying a Supabase SSR session cookie to reach protected routes", () => {
+    const response = middleware(new NextRequest("https://foundation.test/feed", { headers: { cookie: "sb-project-auth-token=verified-session" } }));
     expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("does not treat the legacy app session cookie as a Supabase session", () => {
+    const response = middleware(new NextRequest("https://foundation.test/feed", { headers: { cookie: "app_session_id=legacy-session" } }));
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toContain("/access-required");
   });
 
   it("keeps administrative pages and administrative APIs off the public deployment surface", () => {
@@ -25,7 +31,7 @@ describe("Next route middleware", () => {
 
   it("limits the administrative deployment surface to its workspace and sign-in endpoints", () => {
     vi.stubEnv("GVF_DEPLOYMENT_SURFACE", "admin");
-    expect(middleware(new NextRequest("https://foundation.test/admin/readiness", { headers: { cookie: "app_session_id=test-session" } })).status).toBe(200);
+    expect(middleware(new NextRequest("https://foundation.test/admin/readiness", { headers: { cookie: "sb-project-auth-token=verified-session" } })).status).toBe(200);
     expect(middleware(new NextRequest("https://foundation.test/access-required")).status).toBe(200);
     expect(middleware(new NextRequest("https://foundation.test/programs")).status).toBe(404);
   });

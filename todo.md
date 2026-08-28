@@ -105,11 +105,21 @@
 - [x] Assess and prepare secure Vercel deployment configuration for separate public website, admin-panel, and backend service URLs.
 - [x] Route public and admin API requests through the dedicated backend service and tighten service boundaries before marking the three Vercel surfaces isolated.
 - [x] Add Vercel project configuration and deployment documentation for three Git-linked services without committing secrets.
-- [ ] Create Git-linked Vercel projects for the public website, admin panel, and backend using the approved three-service architecture.
+- [ ] Create Git-linked Vercel projects for the public website, admin panel, and backend using the approved three-service architecture and confirm their exact hostnames.
 - [ ] Configure and verify the required production environment values, distinct URLs, and cross-service boundaries before production release.
 - [x] Convert the Phase A Drizzle schema, connection layer, and migrations from MySQL/TiDB to Supabase PostgreSQL without weakening authorization or feature gates.
 - [x] Provision the Supabase PostgreSQL schema and migrate only authorized existing Phase A records with verification evidence.
-- [ ] Update the Vercel deployment guidance and production configuration for the Supabase PostgreSQL connection without committing secrets.
+- [x] Update the Vercel deployment guidance and production configuration for the Supabase PostgreSQL connection without committing secrets.
 - [x] Create a dedicated Supabase organization and isolated Gram Vikash Foundation PostgreSQL project before any schema or data migration.
 - [x] Obtain approval for and apply a Supabase Row Level Security posture before migrating any approved Phase A records.
 - [x] Make the PostgreSQL data layer fail closed for non-PostgreSQL database URLs so local legacy configuration cannot trigger connection attempts after migration.
+- [ ] Replace the Manus-managed OAuth production dependency with a Vercel-compatible authentication configuration while retaining unified Member and admin authorization safeguards.
+- [ ] Install Supabase SSR/Auth dependencies and replace the Vercel production login/session path with verified Magic Link handling.
+- [x] Add regression coverage for Supabase-authenticated Member/admin authorization and fail-closed missing-auth configuration.
+- [ ] Update Supabase Auth redirect guidance and Vercel environment-variable documentation without committing secrets.
+
+- [x] Update the remaining administrative middleware regression fixture from the retired app_session_id cookie to a Supabase SSR auth cookie.
+- [ ] Configure Supabase Auth Site URL and allowed public/admin redirect URLs for the actual Vercel hosts.
+- [ ] Perform a real Magic Link request, confirmation, and protected Member/admin session check before marking production authentication complete.
+- [ ] Reconcile Supabase Auth Site URL and redirect allowlist with the exact created Vercel hostnames.
+

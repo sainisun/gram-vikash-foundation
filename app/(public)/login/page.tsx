@@ -1,4 +1,18 @@
 import Link from "next/link";
-import { ManagedLoginButton } from "@/components/auth/ManagedLoginButton";
+import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
 
-export default function LoginPage() { return <main className="main"><p className="eyebrow">Member sign-in</p><h1>Access your single Member account.</h1><section className="ledger"><p>The platform uses the configured secure identity service and a one-time browser-bound OAuth state check.</p><ManagedLoginButton label="Sign in securely" /><p><Link href="/register">Need a Member account? Register</Link></p></section></main>; }
+export default async function LoginPage({ searchParams }: { searchParams?: Promise<{ next?: string }> }) {
+  const params = searchParams ? await searchParams : {};
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/my-donations";
+  return (
+    <main className="main">
+      <p className="eyebrow">Member sign-in</p>
+      <h1>Access your single Member account.</h1>
+      <section className="ledger">
+        <p>Enter your email and we will send a one-time secure sign-in link. Your account session remains protected by server-side identity and role checks.</p>
+        <MagicLinkForm label="Email me a secure sign-in link" next={next} />
+        <p><Link href="/register">Need a Member account? Register</Link></p>
+      </section>
+    </main>
+  );
+}

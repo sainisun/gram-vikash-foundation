@@ -26,6 +26,12 @@ export async function getDb() {
   return database;
 }
 
+export function isConfiguredAdminEmail(email: string | null | undefined) {
+  if (!email) return false;
+  const configured = (process.env.GVF_ADMIN_EMAILS ?? "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean);
+  return configured.includes(email.trim().toLowerCase());
+}
+
 export async function upsertUser(user: typeof users.$inferInsert): Promise<void> {
   if (!user.openId) throw new Error("User openId is required");
   const db = await getDb();
@@ -39,7 +45,7 @@ export async function upsertUser(user: typeof users.$inferInsert): Promise<void>
 
   await db.insert(users).values({
     ...user,
-    role: user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user"),
+    role: user.role ?? (user.openId === ENV.ownerOpenId || isConfiguredAdminEmail(user.email) ? "admin" : "user"),
     lastSignedIn: new Date(),
   }).onConflictDoUpdate({ target: users.openId, set: updateSet });
 }

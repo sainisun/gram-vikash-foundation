@@ -34,7 +34,7 @@ The authenticated direct repository import path is `https://vercel.com/new/impor
 
 The public and admin projects are intentionally separated at the route boundary. The public project returns `404` for `/admin` and `/api/admin/*`. The admin project returns `404` for public and Member pages, while allowing `/admin`, `/api/admin/*`, `/access-required`, and only the authentication endpoints it needs. The API project returns `404` for every non-`/api` path. On the public and admin hosts, non-authentication `/api/*` traffic is internally rewritten to the configured API service URL; direct API handlers do not run on either frontend host. If the backend origin is absent or malformed, frontend API traffic returns `503` rather than falling back to a local handler.
 
-After administrator login on the admin host, the OAuth callback returns the user to `/admin`; the public host retains the normal Member return path at `/my-donations`. Cookie settings and server-side role checks remain unchanged.
+Supabase Magic Link confirmation runs on the host that requested the link, so an admin-host request returns to `/admin` and a public-host request returns to `/my-donations`. The backend verifies API requests using the forwarded host cookie. Supabase Auth user IDs are stored in the unified `users.openId` field; `GVF_ADMIN_EMAILS` is the server-side allowlist used to assign the existing admin role after verified sign-in. The legacy Manus OAuth endpoints remain only as compatibility routes and are not used by the public login or registration UI.
 
 ## Production environment values
 
@@ -44,11 +44,12 @@ Set the following in **each Vercel project** for both `Production` and `Preview`
 |---|---:|---:|---:|---|
 | `GVF_DEPLOYMENT_SURFACE` | `public` | `admin` | `api` | Non-secret route boundary selector. |
 | `DATABASE_URL` | Required | Required | Required | Use Supabase’s private PostgreSQL pooled connection URI, including the provider’s required TLS setting. Do not use a browser/anon key as a database URL. |
-| `JWT_SECRET` | Required | Required | Required | Use one strong, shared production value so server-side session validation remains consistent. |
-| `OAUTH_SERVER_URL` | Required | Required | Required | Must be the production OAuth service base URL. |
-| `VITE_APP_ID` | Required | Required | Required | The managed OAuth application identifier. |
-| `VITE_OAUTH_PORTAL_URL` | Required | Required | Required | Managed OAuth portal base URL. |
-| `OWNER_OPEN_ID` | Required | Required | Required | Existing administrator OpenID; do not change it casually. |
+| `SUPABASE_URL` | Required | Required | Required | Dedicated Supabase project URL for server-side Magic Link request and confirmation handling. |
+| `SUPABASE_KEY` | Required | Required | Required | Supabase publishable/anon key for server-side Auth calls. Never use a secret/service-role key in browser-exposed configuration. |
+| `GVF_ADMIN_EMAILS` | Required | Required | Required | Comma-separated verified administrator email allowlist. The first admin must sign in with one of these addresses. |
+| `JWT_SECRET` | Optional legacy | Optional legacy | Optional legacy | Retain only if an explicitly used legacy route requires it; Supabase Auth is the production session authority. |
+| `OAUTH_SERVER_URL`, `VITE_APP_ID`, and `VITE_OAUTH_PORTAL_URL` | Optional legacy | Optional legacy | Optional legacy | Required only if the legacy Manus OAuth compatibility routes are intentionally retained; the Supabase Magic Link UI does not use them. |
+| `OWNER_OPEN_ID` | Optional legacy | Optional legacy | Optional legacy | Retained only for legacy managed-auth compatibility; administrator role assignment uses `GVF_ADMIN_EMAILS`. |
 | `NEXT_PUBLIC_PUBLIC_SITE_URL` | Public URL | Public URL | Optional | Set to the canonical `gvf-public` URL; used for public return links from the admin workspace. |
 | `GVF_API_ORIGIN` | Required | Required | Not set | The HTTPS origin of `gvf-api`, for example `https://gvf-api.vercel.app`. It is read only by middleware and is never sent to browser JavaScript. |
 | `BUILT_IN_FORGE_API_URL` and `BUILT_IN_FORGE_API_KEY` | Only if a deployed route uses Forge | Only if a deployed route uses Forge | Only if a deployed route uses Forge | These Manus-provided values are not automatically available in Vercel. Do not add them unless the affected feature is separately approved. |
@@ -60,12 +61,12 @@ The current production deployment must retain all existing feature-gate values a
 1. Create the three Git-linked Vercel projects in the configured `sainisuns-projects` team, all linked to `sainisun/gram-vikash-foundation` with repository root as the root directory. Git-linked projects create deployment previews from the selected production branch. [1]
 2. Set the per-project environment values above in Vercel, then trigger a new deployment from the same reviewed `main` commit. A secret change requires a redeployment before it becomes available to the server runtime. [2]
 3. Confirm the three generated `vercel.app` URLs. Do not point a custom domain or DNS record at them until production-route, login, and gate checks have passed.
-4. Validate the public URL’s homepage, published program pages, and ledger; validate the admin URL’s sign-in recovery and admin guard; validate the API URL’s public API responses and that a page route returns `404`. Confirm requests to `https://gvf-public.vercel.app/api/summary` and `https://gvf-admin.vercel.app/api/admin/readiness` are served through the configured backend, not from local frontend handlers.
+4. Validate the public URL’s homepage, published program pages, ledger, and Magic Link request form; validate the admin URL’s Magic Link return path and admin guard; validate the API URL’s public API responses and that a page route returns `404`. Confirm requests to `https://gvf-public.vercel.app/api/summary` and `https://gvf-admin.vercel.app/api/admin/readiness` are served through the configured backend, not from local frontend handlers.
 5. Keep Vercel Authentication disabled only for the public project. The application’s own Member/admin authorization remains required. If Vercel deployment protection is added to the admin project, record the named owner and recovery process in the A2 evidence pack.
 
 ## Current database target
 
-The dedicated Supabase PostgreSQL project is `bnntnowpookwwvggpkkv` in the Mumbai region. Its schema, Row Level Security posture, and approved Phase A records have been migrated. Obtain the corresponding pooled PostgreSQL connection URI from Supabase’s **Connect** panel and add it only through Vercel’s encrypted environment-variable UI.
+The dedicated Supabase PostgreSQL project is `bnntnowpookwwvggpkkv` in the Mumbai region. Its schema, Row Level Security posture, and approved Phase A records have been migrated. Obtain the corresponding pooled PostgreSQL connection URI from Supabase’s **Connect** panel and add it only through Vercel’s encrypted environment-variable UI. Configure the Supabase Auth email template to send `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`, and add each public and admin Vercel URL to Supabase Auth’s Site URL/Redirect URLs before testing Magic Links.
 
 ## Browser setup note
 

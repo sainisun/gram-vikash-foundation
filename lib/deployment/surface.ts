@@ -11,7 +11,7 @@ function isApiPath(pathname: string) {
 }
 
 export function isLocalAuthenticationPath(pathname: string) {
-  return pathname === "/api/auth/me" || pathname === "/api/oauth/start" || pathname === "/api/oauth/callback";
+  return pathname === "/api/oauth/start" || pathname === "/api/oauth/callback" || pathname === "/api/auth/logout";
 }
 
 function isAdminPath(pathname: string) {
@@ -24,7 +24,12 @@ export function allowsDeploymentPath(surface: DeploymentSurface, pathname: strin
   if (surface === "public") return !isAdminPath(pathname);
 
   return pathname === "/access-required"
+    || pathname === "/login"
+    || pathname === "/register"
+    || pathname === "/auth/confirm"
     || pathname === "/api/auth/me"
+    || pathname === "/api/auth/magic-link"
+    || pathname === "/api/auth/logout"
     || pathname === "/api/oauth/start"
     || pathname === "/api/oauth/callback"
     || isAdminPath(pathname);

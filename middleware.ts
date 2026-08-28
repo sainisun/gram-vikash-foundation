@@ -3,6 +3,10 @@ import { allowsDeploymentPath, getBackendOrigin, getDeploymentSurface, isLocalAu
 
 const protectedPrefixes = ["/donate", "/my-donations", "/profile", "/feed", "/chat", "/voting", "/admin"];
 
+export function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies.getAll().some(({ name }) => /^sb-.+-auth-token(?:\.\d+)?$/.test(name));
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const surface = getDeploymentSurface();
@@ -23,9 +27,9 @@ export function middleware(request: NextRequest) {
   }
   const requiresSession = protectedPrefixes.some(prefix => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`));
   if (!requiresSession) return NextResponse.next();
-  // The legacy managed-auth bridge sets `app_session_id`. Full token validation remains
-  // server-side work; this middleware provides only an early redirect boundary.
-  if (request.cookies.has("app_session_id")) return NextResponse.next();
+  // Supabase SSR cookies provide the early session boundary; the server session helper
+  // still verifies the token and role before rendering protected data or mutating state.
+  if (hasSupabaseAuthCookie(request)) return NextResponse.next();
   const url = request.nextUrl.clone();
   url.pathname = "/access-required";
   url.searchParams.set("next", request.nextUrl.pathname);
