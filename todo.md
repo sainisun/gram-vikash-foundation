@@ -123,3 +123,26 @@
 - [ ] Perform a real Magic Link request, confirmation, and protected Member/admin session check before marking production authentication complete.
 - [ ] Reconcile Supabase Auth Site URL and redirect allowlist with the exact created Vercel hostnames.
 
+- [ ] Configure the user-supplied Supabase publishable key and database credential only in encrypted Vercel environments, with correct URL encoding and service scoping.
+- [ ] Confirm whether server-side Supabase service-role access is required; never substitute a publishable key for a service-role secret.
+- [ ] Verify the supplied credentials through a safe test without logging or exposing secret values.
+
+- [x] Resolve Vercel same-repository project-linking behavior by choosing verified host aliases or distinct app roots; do not mislabel the reused gvf-public project as gvf-admin.
+- [ ] Verify the exact Vercel project URL and environment scope before claiming admin deployment success.
+
+- [x] Choose a truthful Vercel separation model: distinct Git-linked app roots/projects or one project with verified custom host aliases and host-aware surface resolution.
+- [ ] Do not claim gvf-admin or gvf-api deployment until Vercel returns distinct project/hostname records and their environment scopes are verified.
+
+- [x] Create apps/public, apps/admin, and apps/api Vercel build roots that share the reviewed application source while selecting their deployment surface through environment configuration.
+- [x] Generate and validate workspace lockfile importers for the three Vercel build roots without duplicating secrets.
+
+- [x] Define shared-root boundaries for public, admin, and API Vercel builds without duplicating secrets or weakening route guards.
+- [x] Create independently buildable apps/public, apps/admin, and apps/api roots with workspace-safe package metadata and Vercel settings.
+- [x] Add build-root regression coverage and validate each root before creating Git-linked Vercel projects.
+
+- [x] Fix the missing shared storage-root reference that blocks the apps/public, apps/admin, and apps/api builds.
+
+- [x] Fix the missing shared PostCSS configuration link that blocks the three Vercel root builds.
+
+- [x] Add the shared Vite configuration link required by the retained server development adapter so each independent Vercel root passes Next.js type checking.
+

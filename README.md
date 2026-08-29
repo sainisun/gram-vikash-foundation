@@ -19,7 +19,7 @@ Read [`AGENTS.md`](AGENTS.md) first. It defines the non-negotiable project rules
 | [`docs/system-design.md`](docs/system-design.md) | Database posture, caching, polling versus realtime, vote integrity, moderation pipeline, reconciliation, and disaster recovery |
 | [`docs/database-schema.md`](docs/database-schema.md) | PostgreSQL DDL, constraints, indexes, foreign-key behavior, and data-sensitivity annotations |
 | [`docs/api-contracts.md`](docs/api-contracts.md) | JSON API methods, paths, authorization, request/response shapes, errors, and rate limits |
-| [`docs/folder-structure.md`](docs/folder-structure.md) | Original file-level Next.js target structure, route groups, access rules, auth helpers, naming, and feature placement guide |
+| [`docs/folder-structure.md`](docs/folder-structure.md) | Authoritative file-level Next.js route structure, unified Member access rules, auth helpers, naming, and feature placement guide |
 | [`docs/workspace-reconciliation.md`](docs/workspace-reconciliation.md) | Active Next.js App Router, managed-auth, and production-gate implementation baseline |
 | [`docs/nextjs-app-router-migration.md`](docs/nextjs-app-router-migration.md) | Approved migration boundary, preserved safeguards, sequence, and rollback approach for the Next.js App Router transition |
 | [`docs/implementation-plan.md`](docs/implementation-plan.md) | Sequenced Phase A/B/C task plan with dependencies, definitions of done, and human checkpoints |
@@ -40,7 +40,8 @@ The implemented Phase A boundary comprises managed-auth Member registration and 
 
 ## Local development setup
 
-The repository contains the active Next.js App Router workspace. It uses React, TypeScript, Tailwind-style global CSS, Drizzle with PostgreSQL, Supabase as the production database target, managed OAuth, and server-side route handlers; see the reconciliation guide before changing implementation boundaries. The intended local setup is:
+The repository contains the active Next.js App Router workspace and three Vercel monorepo roots under `apps/public`, `apps/admin`, and `apps/api`. It uses React, TypeScript, Tailwind-style global CSS, Drizzle with PostgreSQL, Supabase as the production database and Magic Link target, and server-side route handlers; see the reconciliation and Vercel deployment guides before changing implementation boundaries.
+ The intended local setup is:
 
 ```bash
 git clone https://github.com/sainisun/gram-vikash-foundation.git

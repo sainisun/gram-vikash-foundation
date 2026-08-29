@@ -8,21 +8,21 @@
 
 ## 1. Adopted implementation baseline
 
-The active workspace is a Next.js 15 App Router application using React 19, TypeScript, Tailwind-style global CSS, Drizzle ORM, managed MySQL/TiDB, and managed OAuth. Server-side database and authorization services back the `app/api` route handlers. This is the implementation baseline for Phase A; earlier React/Vite, Express/tRPC, PostgreSQL, password, NextAuth/Supabase Auth, Vercel, and custom-auth examples are not the runtime architecture for this build.
+The active workspace is a Next.js 15 App Router application using React 19, TypeScript, Tailwind-style global CSS, Drizzle ORM with PostgreSQL, Supabase as the production database and Magic Link provider, and server-side authorization services backing the `app/api` route handlers. The repository also provides independent `apps/public`, `apps/admin`, and `apps/api` Vercel build roots. This is the implementation baseline for Phase A; earlier React/Vite, Express/tRPC, managed MySQL/TiDB, password, NextAuth, and custom-auth examples are not the runtime architecture for this build.
 
 | Concern | Earlier planning assumption | Adopted Phase A implementation baseline | Required implementation rule |
 |---|---|---|---|
 | Frontend | React/Vite/Wouter examples | Next.js 15 App Router, React 19, Tailwind-style global CSS | Page components live in the authoritative `app/(public)`, `app/(member)`, and `app/(admin)` groups. |
 | Backend | Express/tRPC examples | Next.js route handlers plus server-only services | Handlers belong in `app/api/**/route.ts`; they call server-only database and authorization helpers. |
-| Database | PostgreSQL | Managed MySQL/TiDB with Drizzle | `drizzle/schema.ts` and applied migrations are authoritative for the runtime schema. |
-| Identity | Password baseline / NextAuth / Supabase Auth | Managed Manus OAuth | Do not implement custom password storage. A future password flow requires an approved identity-provider and security design. |
+| Database | PostgreSQL | Supabase PostgreSQL with Drizzle | `drizzle/schema.ts` and the applied PostgreSQL baseline are authoritative for the runtime schema. |
+| Identity | Password baseline / NextAuth / Supabase Auth | Supabase Auth Magic Link | Do not implement custom password storage. Keep verified identity mapping and unified Member/admin authorization in the server session helper. |
 | Storage | Supabase/R2 examples | Workspace S3 storage helpers | Store only S3 object references in the database; never store file bytes in database columns. |
-| Hosting | Vercel | Managed WebDev Autoscale hosting | Use the managed server and database; do not rely on an always-on worker in Phase A. |
+| Hosting | Vercel | Three Vercel monorepo roots: `apps/public`, `apps/admin`, and `apps/api` | Keep each deployment surface explicit and configure production secrets only in its Vercel environment. |
 | API contract form | tRPC examples | JSON-over-HTTP Next route handlers | Preserve the authorization, data-projection, validation, status/error semantics as logical contracts, expressed as route handlers. |
 
 ## 2. Documentation adaptation rules
 
-The PRD remains the product source of truth. The `database-schema.md` PostgreSQL DDL is a relational design reference only; the TypeScript Drizzle schema and migration files are the executable schema. UUID-specific or PostgreSQL-specific examples must be translated to the initialized MySQL/TiDB and Drizzle conventions without weakening unique constraints, foreign keys, indexes, financial amount checks, or the one-vote-per-Member invariant.
+The PRD remains the product source of truth. The `database-schema.md` PostgreSQL DDL is a relational design reference; the TypeScript Drizzle schema and applied PostgreSQL migration are the executable schema. Supabase-specific settings must not weaken unique constraints, foreign keys, indexes, financial amount checks, or the one-vote-per-Member invariant.
 
 The REST paths in `api-contracts.md` are domain-contract names. Phase A implements their route-handler equivalents under `app/api`. For example, the public financial summary is available through `/api/summary`; offline donation entry is restricted to `/api/admin/donations/offline`; and Member profile operations are restricted to `/api/member/profile`. Handlers must validate inputs, derive identity from the managed session, and never accept a browser-supplied financial owner, administrative actor, role, or verification tier.
 
@@ -33,7 +33,7 @@ The authoritative folder-structure document describes the current Next.js implem
 | Area | Implement now | Explicitly deferred or feature-gated |
 |---|---|---|
 | Financial records | Member profile, program, donation, expense, audit event, derived public totals, opt-in public-display projection | Refund/reversal workflows beyond documented controlled status support |
-| Member access | Managed-auth sign-in, Member profile completion, village/ward, public-display control | Custom password credentials, self-service voter identity verification |
+| Member access | Supabase Magic Link sign-in, Member profile completion, village/ward, public-display control | Custom password credentials, self-service voter identity verification |
 | Public experience | Homepage, program pages, summary, public ledgers, donor wall | Public community feed, chat, private messaging |
 | Admin operations | Admin-restricted offline donation and expense creation, audit trail, ledger review | Advanced role management beyond template `user`/`admin` until a formal role design is approved |
 | Payments | Feature configuration status, test-mode readiness checks, disabled checkout state | Live Razorpay order creation, webhook activation, reconciliation writes, receipt email delivery |
@@ -50,7 +50,7 @@ Live payment activation is a blocked production action, not a code-completion mi
 | Webhook endpoint and event policy | Test-mode signature validation, idempotency tests, duplicate/out-of-order handling, and reconciliation procedure | Technical owner | Required before accepting live webhooks |
 | Financial approval | Named accounting owner, receipt wording, ledger review process, and written approval for production money movement | Founder and finance owner | Required before live payments |
 | Public disclosures | Approved privacy, terms, refund/cancellation, contact, and grievance content appropriate to the operating entity | Founder with qualified review | Required before live payments |
-| Authentication controls | Managed OAuth sign-in verified in production, authorization tests passed, admin assignments reviewed | Technical owner and founder | Required before financial/admin access |
+| Authentication controls | Supabase Magic Link sign-in verified in production, authorization tests passed, admin assignments reviewed | Technical owner and founder | Required before financial/admin access |
 | Legal boundaries | Confirmed domestic-donation policy; FCRA/foreign-payment paths remain disabled unless separately approved | Founder with qualified review | Required before public launch |
 
 ## 5. Feature flags and hard gates

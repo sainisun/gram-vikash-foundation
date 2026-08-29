@@ -16,7 +16,8 @@ The middleware reads `GVF_DEPLOYMENT_SURFACE` on each request. A missing or inva
 
 ## Version-controlled configuration
 
-The root [`vercel.json`](../vercel.json) keeps Git deployments deterministic by requiring a frozen pnpm lockfile and the existing production build command. Vercel links every project to `sainisun/gram-vikash-foundation`, uses the repository root as its root directory, and deploys from `main`. Vercel's Git-linked project model supports distinct projects from the same repository; each project owns its own environment values and deployment URL. [1]
+The root [`vercel.json`](../vercel.json) keeps Git deployments deterministic by requiring a frozen pnpm lockfile and the existing production build command. Vercel links every project to `sainisun/gram-vikash-foundation`, uses its dedicated monorepo root (`apps/public`, `apps/admin`, or `apps/api`), and deploys from `main`.
+ Vercel's Git-linked project model supports distinct projects from the same repository; each project owns its own environment values and deployment URL. [1]
 
 ## Project records
 
@@ -26,9 +27,10 @@ The root [`vercel.json`](../vercel.json) keeps Git deployments deterministic by 
 | Admin panel | `gvf-admin` | Pending | Pending | Must be created with a distinct project configuration/root from the public service. |
 | Backend API | `gvf-api` | Pending | Pending | Must be created with a distinct project configuration/root from the public service. |
 
-The configured Vercel integration did not create a second same-root Git project: the `gvf-admin` creation request reused `gvf-public`. Do not treat that reused response as an admin project. Complete the two remaining projects through the authenticated Vercel dashboard with their own root-directory configuration, then enter their generated URLs in the environment values below.
+The configured Vercel integration did not create a second same-root Git project: the `gvf-admin` creation request reused `gvf-public`. Do not treat that reused response as an admin project. The monorepo now provides distinct root-directory configurations, so create the two remaining projects through the authenticated Vercel dashboard with `apps/admin` and `apps/api` selected as their roots, then enter their generated URLs in the environment values below.
 
-The authenticated Vercel dashboard was checked after project creation. It shows `gvf-public` at `https://gvf-public.vercel.app` with **No Production Deployment**; no configuration values or deployment have been created on that project yet. The subsequent browser import view did not persist, so no administrator or API project creation was confirmed from that attempt.
+The authenticated Vercel dashboard was checked after project creation. It shows `gvf-public` at `https://gvf-public.vercel.app`; its Git-linked preview is now buildable from the reviewed source. The public project still requires its production environment values before it can serve the configured Supabase-backed runtime.
+ The subsequent browser import view did not persist, so no administrator or API project creation was confirmed from that attempt.
 
 The authenticated direct repository import path is `https://vercel.com/new/import?hasTrialAvailable=1&id=1342992699&import-source=import-suggestions&name=gram-vikash-foundation&owner=sainisun&provider=github&s=https%3A%2F%2Fgithub.com%2Fsainisun%2Fgram-vikash-foundation`. It should be used rather than a template card if the import list’s dynamic element ordering makes the repository action ambiguous.
 
@@ -58,7 +60,7 @@ The current production deployment must retain all existing feature-gate values a
 
 ## Deployment sequence
 
-1. Create the three Git-linked Vercel projects in the configured `sainisuns-projects` team, all linked to `sainisun/gram-vikash-foundation` with repository root as the root directory. Git-linked projects create deployment previews from the selected production branch. [1]
+1. Create the three Git-linked Vercel projects in the configured `sainisuns-projects` team, all linked to `sainisun/gram-vikash-foundation` with roots `apps/public`, `apps/admin`, and `apps/api`. Git-linked projects create deployment previews from the selected production branch. [1]
 2. Set the per-project environment values above in Vercel, then trigger a new deployment from the same reviewed `main` commit. A secret change requires a redeployment before it becomes available to the server runtime. [2]
 3. Confirm the three generated `vercel.app` URLs. Do not point a custom domain or DNS record at them until production-route, login, and gate checks have passed.
 4. Validate the public URL’s homepage, published program pages, ledger, and Magic Link request form; validate the admin URL’s Magic Link return path and admin guard; validate the API URL’s public API responses and that a page route returns `404`. Confirm requests to `https://gvf-public.vercel.app/api/summary` and `https://gvf-admin.vercel.app/api/admin/readiness` are served through the configured backend, not from local frontend handlers.
